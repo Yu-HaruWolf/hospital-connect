@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:frontend/ambulance/select_department.dart';
+import 'package:frontend/ambulance/select_hospital.dart';
 
 void main() {
   runApp(const MyApp());
@@ -58,23 +58,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    int screenId = 1;
-    List<Widget> insideWidget = [];
+    int screenId = 2; // 画面IDを指定
+    Widget insideWidget;
     switch (screenId) {
-      case 0:
-        insideWidget = <Widget>[
-          const Text(
-            'You have pushed the button this many times:',
-          ),
-          Text(
-            '$_counter',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-        ];
-        break;
       case 1:
-        insideWidget = [const SelectDepartment()];
+        insideWidget = const SelectDepartment();
         break;
+      case 2:
+        insideWidget = SelectHospital();
+        break;
+      default:
+        insideWidget = Text('正しいscreenIdを設定してください！');
     }
     return Scaffold(
       appBar: AppBar(
@@ -82,16 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: insideWidget,
-        ),
+        child: insideWidget,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
