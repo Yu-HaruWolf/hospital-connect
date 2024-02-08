@@ -17,6 +17,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
       selected.remove(id);
     } else {
       selected.add(id);
+      //print(selected);
     }
   }
 
@@ -24,12 +25,51 @@ class _SelectDepartmentState extends State<SelectDepartment> {
   Widget build(BuildContext context) {
     ButtonStyle selectedButtonStyle = const ButtonStyle(
       backgroundColor: MaterialStatePropertyAll(Colors.lightBlue),
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
     );
-    ButtonStyle buttonStyle = const ButtonStyle();
+
+    ButtonStyle cancelButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(Colors.red),
+      foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+      ),
+    );
+
+    ButtonStyle sendButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(Colors.green),
+      foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+      ),
+    );
+
+    ButtonStyle buttonStyle = const ButtonStyle(
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+    );
     double buttonWidth = MediaQuery.of(context).size.width * 0.4;
     EdgeInsets buttonPadding = const EdgeInsets.all(8.0);
-    List<String> department = ['あ', '内科', 'う', 'え', 'お', 'か', 'き', 'く'];
     var appState = context.watch<ApplicationState>();
+    EdgeInsets underPadding =
+        const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
+    List<String> department = [
+      '内科',
+      '小児科',
+      '皮膚科',
+      '精神科',
+      '外科',
+      '産婦人科',
+      '眼科',
+      '耳鼻咽喉科',
+      '泌尿器科',
+      '脳神経外科',
+      '形成外科',
+      '整形外科'
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,12 +98,42 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                 ),
             ],
           ),
-        ElevatedButton.icon(
-            onPressed: () {
-              appState.screenId = 2;
-            },
-            icon: const Icon(Icons.send),
-            label: const Text('送信'))
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: underPadding,
+              child: SizedBox(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      selected.clear();
+                      print(selected);
+                    });
+                  },
+                  icon: const Icon(Icons.close),
+                  label: const Text('キャンセル'),
+                  style: cancelButtonStyle,
+                ),
+              ),
+            ),
+            Padding(
+              padding: underPadding,
+              child: SizedBox(
+                width: buttonWidth,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    print(selected);
+                    appState.screenId = 2;
+                  },
+                  icon: const Icon(Icons.send),
+                  label: const Text('送信'),
+                  style: sendButtonStyle,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
