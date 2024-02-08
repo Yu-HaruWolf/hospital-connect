@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
 
 class SelectDepartment extends StatefulWidget {
@@ -28,6 +29,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
     double buttonWidth = MediaQuery.of(context).size.width * 0.4;
     EdgeInsets buttonPadding = const EdgeInsets.all(8.0);
     List<String> department = ['あ', '内科', 'う', 'え', 'お', 'か', 'き', 'く'];
+    var appState = context.watch<ApplicationState>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,7 +59,9 @@ class _SelectDepartmentState extends State<SelectDepartment> {
             ],
           ),
         ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              appState.screenId = 2;
+            },
             icon: const Icon(Icons.send),
             label: const Text('送信'))
       ],

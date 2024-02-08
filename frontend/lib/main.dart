@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/ambulance/select_department.dart';
 import 'package:frontend/ambulance/select_hospital.dart';
+import 'package:frontend/app_state.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ApplicationState(),
+    builder: ((context, child) => const MyApp()),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -12,11 +17,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<ApplicationState>();
+    print(appState.selectedHospitalId);
     return MaterialApp(
       title: 'TCU Rescue',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 101, 13, 76)),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'TCU Rescue'),
@@ -58,7 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    int screenId = 2; // 画面IDを指定
+    var appState = context.watch<ApplicationState>();
+    int screenId = appState.screenId; // 画面IDを指定
     Widget insideWidget;
     switch (screenId) {
       case 1:

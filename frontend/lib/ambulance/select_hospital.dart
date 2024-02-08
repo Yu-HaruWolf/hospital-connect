@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/app_state.dart';
+import 'package:frontend/main.dart';
+import 'package:provider/provider.dart';
 
 class SelectHospital extends StatelessWidget {
   @override
@@ -35,6 +39,7 @@ class HospitalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<ApplicationState>();
     TextStyle nameStyle = const TextStyle(
       fontSize: 20,
     );
@@ -42,7 +47,19 @@ class HospitalCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          print(id);
+          appState.selectedHospitalId = id;
+          appState.screenId = 1;
+          // Firebaseにアクセスするのはこんな感じ？
+          FirebaseFirestore.instance.collection('hospital').get().then(
+            (value) {
+              print("Successfully completed");
+              for (var docSnapshot in value.docs) {
+                print('${docSnapshot.id} => ${docSnapshot.data()}');
+              }
+            },
+            onError: (e) => print("Error getting document: $e"),
+          );
+          //
         },
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
