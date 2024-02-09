@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/ambulance/hospital_detail.dart';
 import 'package:frontend/ambulance/select_department.dart';
 import 'package:frontend/ambulance/select_hospital.dart';
+import 'package:frontend/ambulance/chat_room.dart';
 import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
 
@@ -72,10 +74,16 @@ class _MyHomePageState extends State<MyHomePage> {
         insideWidget = const SelectDepartment();
         break;
       case 2:
-        insideWidget = SelectHospital();
+        insideWidget = const SelectHospital();
+        break;
+      case 3:
+        insideWidget = HospitalDetails();
+        break;
+      case 4:
+        insideWidget = ChatRoom();
         break;
       default:
-        insideWidget = Text('正しいscreenIdを設定してください！');
+        insideWidget = const Text('正しいscreenIdを設定してください！');
     }
     return Scaffold(
       appBar: AppBar(

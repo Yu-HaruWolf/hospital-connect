@@ -1,25 +1,58 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/ambulance/hospital.dart';
 import 'package:frontend/app_state.dart';
-import 'package:frontend/main.dart';
 import 'package:provider/provider.dart';
 
-class SelectHospital extends StatelessWidget {
+class SelectHospital extends StatefulWidget {
+  const SelectHospital({super.key});
+
+  @override
+  State<SelectHospital> createState() => _SelectHospitalState();
+}
+
+class _SelectHospitalState extends State<SelectHospital> {
+  List<Hospital> hospitals = [];
+
+  @override
+  initState() {
+    super.initState();
+    loadHospitals();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          for (int i = 0; i < 10; i++)
+          for (Hospital hospital in hospitals)
             HospitalCard(
-              name: 'name',
-              address: 'Address',
-              number: 'Number',
-              id: i.toString(),
+              name: hospital.name,
+              address: hospital.address,
+              number: hospital.number,
+              id: hospital.id,
             ),
         ],
       ),
     );
+  }
+
+  Future<void> loadHospitals() async {
+    List<Hospital> result = [];
+    var value = await FirebaseFirestore.instance.collection('hospital').get();
+
+    for (var docSnapshot in value.docs) {
+      Map<String, dynamic> map = docSnapshot.data();
+      result.add(Hospital(
+          id: docSnapshot.id,
+          name: map.containsKey('name') ? map['name'] : 'No Name',
+          address: map.containsKey('address') ? map['address'] : 'No Address',
+          number: map.containsKey('call') ? map['call'] : 'No Number'));
+    }
+
+    setState(() {
+      hospitals = result;
+    });
   }
 }
 
@@ -48,8 +81,9 @@ class HospitalCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           appState.selectedHospitalId = id;
-          appState.screenId = 1;
+          appState.screenId = 3;
           // Firebaseにアクセスするのはこんな感じ？
+          /*
           FirebaseFirestore.instance.collection('hospital').get().then(
             (value) {
               print("Successfully completed");
@@ -59,6 +93,7 @@ class HospitalCard extends StatelessWidget {
             },
             onError: (e) => print("Error getting document: $e"),
           );
+          */
           //
         },
         child: SizedBox(
