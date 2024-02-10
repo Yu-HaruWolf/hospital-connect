@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
 
 class SelectDepartment extends StatefulWidget {
@@ -24,7 +26,8 @@ class _SelectDepartmentState extends State<SelectDepartment> {
   Widget build(BuildContext context) {
     ButtonStyle selectedButtonStyle = const ButtonStyle(
       backgroundColor: MaterialStatePropertyAll(Colors.lightBlue),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      foregroundColor: MaterialStatePropertyAll(Colors.black,),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.lightBlue,width: 2)),
     );
 
     ButtonStyle cancelButtonStyle = ButtonStyle(
@@ -48,8 +51,11 @@ class _SelectDepartmentState extends State<SelectDepartment> {
     );
 
     ButtonStyle buttonStyle = const ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
       foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.black,width: 2)),
     );
+  
     double buttonWidth = MediaQuery.of(context).size.width * 0.4;
     EdgeInsets buttonPadding = const EdgeInsets.all(8.0);
     EdgeInsets underPadding = const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
@@ -81,7 +87,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                       style: selected.contains(i * 2 + j)
                           ? selectedButtonStyle
                           : buttonStyle,
-                      child: Text(department.elementAt(i * 2 + j)),
+                      child: Text(department.elementAt(i * 2 + j),style: const TextStyle(fontWeight: FontWeight.bold),),
                     ),
                   ),
                 ),
