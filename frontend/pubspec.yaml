@@ -38,6 +38,8 @@ dependencies:
   firebase_core: ^2.25.3
   cloud_firestore: ^4.15.4
   flutter_chat_ui: ^1.6.12
+  firebase_auth: ^4.17.4
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

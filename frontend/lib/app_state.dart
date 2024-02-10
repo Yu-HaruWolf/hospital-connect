@@ -7,7 +7,7 @@ class ApplicationState extends ChangeNotifier {
     init();
   }
 
-  int _screenId = 1;
+  int _screenId = -1;
   int get screenId => _screenId;
   set screenId(int value) {
     _screenId = value;
