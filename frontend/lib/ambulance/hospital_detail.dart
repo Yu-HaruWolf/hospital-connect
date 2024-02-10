@@ -19,6 +19,48 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         .collection('hospital')
         .doc(appState.selectedHospitalId)
         .get();
+/*    button_style    */
+    ButtonStyle backstyle = const ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+    );
+
+    ButtonStyle requeststyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      shape: MaterialStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+      ),
+    );
+
+    ButtonStyle chatstyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      shape: MaterialStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+      ),
+    );
+
+/*    text_style    */
+    TextStyle nameStyle = const TextStyle(
+      fontSize: 20,
+    );
+
+    TextStyle normalStyle = const TextStyle(
+      fontSize: 20,
+    );
+
+    TextStyle status_style = const TextStyle(
+      fontSize: 20,
+    );
+
     return Column(
       children: [
         FutureBuilder(
@@ -40,30 +82,53 @@ class _HospitalDetailsState extends State<HospitalDetails> {
               final number = snapshot.data!.data()!.containsKey('call')
                   ? snapshot.data!.data()!['call']
                   : 'No call';
+/*          hospital_info      */
               return Column(
                 children: [
-                  Text(name),
-                  Text(address),
-                  Text(number),
+                  TextWithIcon(
+                      textStyle: nameStyle,
+                      iconData: Icons.local_hospital_sharp,
+                      text: name),
+                  TextWithIcon(
+                      textStyle: normalStyle,
+                      iconData: Icons.domain,
+                      text: address),
+                  TextWithIcon(
+                      textStyle: normalStyle,
+                      iconData: Icons.call,
+                      text: number),
                 ],
               );
             }),
-        Text('Status: ${statusMessage[hospitalStatus]}'),
+        TextWithIcon(
+          textStyle: status_style,
+          iconData: Icons.send,
+          text: ('Status: ${statusMessage[hospitalStatus]}'),
+        ),
+
+/*          ボタン配置          */
         ElevatedButton(
-            onPressed: () {
-              appState.screenId = 1;
-            },
-            child: const Text('Back')),
+          onPressed: () {
+            appState.screenId = 1;
+          },
+          child: const Text('Back'),
+          style: backstyle,
+        ),
         ElevatedButton(
-            onPressed: () {
-              changeStatus(hospitalStatus == 0 ? 1 : 0);
-            },
-            child: Text('Change Status')),
+          onPressed: () {
+            changeStatus(hospitalStatus == 0 ? 1 : 0);
+          },
+          child: Text('Change Status'),
+          style: requeststyle,
+        ),
         ElevatedButton(
-            onPressed: () {
-              appState.screenId = 4;
-            },
-            child: Text('Chat')),
+          onPressed: () {
+            appState.screenId = 4;
+          },
+          //icon: const Icon(Icons.chat),
+          child: Text('chat'),
+          style: chatstyle,
+        ),
       ],
     );
   }
@@ -72,5 +137,34 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     setState(() {
       hospitalStatus = statusNum;
     });
+  }
+}
+
+class TextWithIcon extends StatelessWidget {
+  const TextWithIcon({
+    super.key,
+    required this.textStyle,
+    required this.iconData,
+    required this.text,
+  });
+
+  final TextStyle textStyle;
+  final IconData iconData;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          iconData,
+          color: Colors.black38,
+        ),
+        Text(
+          text,
+          style: textStyle,
+        ),
+      ],
+    );
   }
 }

@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
 
@@ -24,8 +26,10 @@ class _SelectDepartmentState extends State<SelectDepartment> {
   @override
   Widget build(BuildContext context) {
     ButtonStyle selectedButtonStyle = const ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.lightBlue),
+      backgroundColor: MaterialStatePropertyAll(Colors.cyan),
       foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(
+          BorderSide(color: Colors.lightBlue, width: 3)),
     );
 
     ButtonStyle cancelButtonStyle = ButtonStyle(
@@ -49,8 +53,11 @@ class _SelectDepartmentState extends State<SelectDepartment> {
     );
 
     ButtonStyle buttonStyle = const ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
       foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
     );
+
     double buttonWidth = MediaQuery.of(context).size.width * 0.4;
     EdgeInsets buttonPadding = const EdgeInsets.all(8.0);
     var appState = context.watch<ApplicationState>();
@@ -92,7 +99,10 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                       style: selected.contains(i * 2 + j)
                           ? selectedButtonStyle
                           : buttonStyle,
-                      child: Text(department.elementAt(i * 2 + j)),
+                      child: Text(
+                        department.elementAt(i * 2 + j),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ),
@@ -104,11 +114,12 @@ class _SelectDepartmentState extends State<SelectDepartment> {
             Padding(
               padding: underPadding,
               child: SizedBox(
+                width: buttonWidth,
                 child: ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
                       selected.clear();
-                      print(selected);
+                      //print(selected);
                     });
                   },
                   icon: const Icon(Icons.close),
@@ -124,10 +135,13 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     print(selected);
+                    print(selected.length);
                     appState.screenId = 2;
                   },
                   icon: const Icon(Icons.send),
-                  label: const Text('送信'),
+                  label: selected.isNotEmpty
+                      ? Text('送信 ${selected.length}')
+                      : const Text('送信'),
                   style: sendButtonStyle,
                 ),
               ),
