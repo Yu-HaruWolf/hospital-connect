@@ -11,24 +11,6 @@
 </style>
 </head>
 
-<!-- コンテンツ表示画面 -->
-
-<!--<div>
-    <div> 名前：<input type="text" id="uname"> </div>
-    <div>
-        <textarea id="text" cols="30" rows="10"></textarea>
-        <button id="send">送信</button>
-        <br>
-        <button id="send">送信</button>
-    </div>
-    <div>
-      <img id="image" src="" alt="画像">
-    </div>
-    <div id="output" style="overflow: auto;height: 700px;"> </div>
-</div>-->
-<!--/ コンテンツ表示画面 -->
-
-<!--ボタン表示-->
 <body>
   <div>
     <button id="dep00">内科</button>
@@ -43,7 +25,8 @@
     <button id="dep09">脳神経外科</button>
     <button id="dep10">形成外科</button>
     <button id="dep11">整形外科</button><br><br>
-    <button id="serch">検索</button><br><br>
+    <button id="serchAnd">AND検索</button><br><br>
+    <button id="serchOr">OR検索</button><br><br>
     <button id="submit">登録</button>
   </div>
   <br>
@@ -64,7 +47,7 @@
 <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js';
-  import { getFirestore,collection, addDoc,getDoc,getDocs,query, where,GeoPoint,doc} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
+  import { getFirestore,collection, addDoc,getDoc,getDocs,query, where,GeoPoint,doc, updateDoc} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -77,13 +60,15 @@
       messagingSenderId: "246901411650",
       appId: "1:246901411650:web:86d48bc20cb31ba88682db"
     };
+
   // Initialize Firebase
   const app = initializeApp(firebaseConfig); //firebaseにアクセス
   const db = getFirestore(app);  //データベースにアクセス
   const requestRef = collection(db, "request");
   console.log(requestRef);
 
-  //内科ボタンをクリックされると以下の関数が実行される。　リクエストを作成
+  //内科ボタンを押すと実行
+  //requestの直下にドキュメントとフィールドが自動生成される
   $("#dep00").on("click",async function() {
     const a =  await addDoc(requestRef,{
       patient : '0',
@@ -94,37 +79,51 @@
     const recDoc = await a.path;
     console.log(recDoc);
 
-
-  //すべてのドキュメントを取得
-   /*async function f1(){  
-    const querySnapshot = await getDocs(requestRef);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-      });
-     };
-.path
-   f1();
-   console(dog.id);*/
   });
+  
+  //以下AND検索とOR検索に関する機能
+  const hospitalArray = ['department.0', 'department.1','department.2']//仮に与えられたとする
 
-  //patient0の情報を基に病院を検索
-  $("#serch").on("click",async function(){
+  //hospitalArrayの情報とすべて当てはまる病院を表示(AND検索)
+  $("#serchAnd").on("click",async function(){
     const hospitalRef = collection(db, "hospital");
-    const q = query(hospitalRef, where("department.0", "==", true));
-    const querySnapshot = await getDocs(q);
+    
+    //hospitalArray[0]がtrueとなるクエリを作成
+    let queryAnd = query(hospitalRef, where(hospitalArray[0], "==", true));
+    for ( var i = 1; i < hospitalArray.length; i++ ){
+      queryAnd = query(queryAnd, where(hospitalArray[i], "==", true))
+    };
+
+    const querySnapshot = await getDocs(queryAnd);
     querySnapshot.forEach((doc) => { // 病院の情報を取得 & consoleに表示
       console.log(doc.id, " => ", doc.data());
       console.log(doc.data().name)//フィールド取得
     });
   });
 
+    //hospitalArrayの情報とひとつでも当てはまる病院を表示(OR検索)
+  $("#serchOr").on("click",async function(){
+    const hospitalRef = collection(db, "hospital");
+    let hospitalName = {} //空の辞書作成
+    for ( var i = 0; i < hospitalArray.length; i++ ){
+      var q = query(hospitalRef, where(hospitalArray[i], "==", true));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        hospitalName[doc.data().name] = doc.data() // keyが重複した場合、後に追加したデータが優先される
+      });
+    };
+    console.log(hospitalName)
+    console.log(hospitalName['高須クリニック0'])
+  });
+  
+  
+  
   //病院のデータベース
   const hospitalData = {
     ID : '0000',
     address : 'japana',
     call : '08012345678',
-    name : '高須クリニック',
+    name : '高須クリニック012',
     place: new GeoPoint(35.6895, 139.6917),
     department: {
         0: false,
@@ -157,23 +156,32 @@
   const hospitalName = "AAA"
 
 
-  //病院の受け入れ人数変更
   $("#update").on("click",async function(){
+    //病院名検索
     const hospitalRef = collection(db, "hospital");
     const serchHospital = document.getElementById("hospitalName").value;
     const q = query(hospitalRef, where("name", "==", serchHospital ));
     const querySnapshot = await getDocs(q);
     console.log(querySnapshot);
-    querySnapshot.forEach((doc) => { // 病院の情報を取得 & consoleに表示
+
+    //当てはまる病院の受け入れ人数を更新
+    querySnapshot.forEach(async (doc) => { 
+      //ドキュメントIDと受け入れ人数を出力
       console.log(doc.id, " => ", doc.data());
-      console.log(doc.data().numOfAccepted)//フィールド取得
-    });
-    /*
-    Ref.update({
-      numOfAccepted: 20
-    })
-    */
-  })
+      console.log(doc.data().numOfAccepted);
+      
+      //テキストボックスに入力された文字列を10進数に変換
+      const numOfAcceptedIDValue = document.getElementById("numOfAcceptedID").value;
+      const numOfAcceptedIDNumber = parseInt(numOfAcceptedIDValue, 10);
+
+      //ドキュメントIDに対して受け入れ人数を更新
+      const hospitalDocRef = doc.ref;
+      await updateDoc(hospitalDocRef,{
+        numOfAccepted: numOfAcceptedIDNumber
+      });
+      console.log("update numOfAccepted")
+      });
+  });
 </script>
 </body>
 </html>
