@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:frontend/app_state.dart';
@@ -12,6 +13,7 @@ class SelectDepartment extends StatefulWidget {
 
 class _SelectDepartmentState extends State<SelectDepartment> {
   var selected = [];
+  
 
   void toggleSelected(var id) {
     if (selected.contains(id)) {
@@ -24,10 +26,11 @@ class _SelectDepartmentState extends State<SelectDepartment> {
 
   @override
   Widget build(BuildContext context) {
+  
     ButtonStyle selectedButtonStyle = const ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.lightBlue),
-      foregroundColor: MaterialStatePropertyAll(Colors.black,),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.lightBlue,width: 2)),
+      backgroundColor: MaterialStatePropertyAll(Colors.white),
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      side: MaterialStatePropertyAll(BorderSide(color: Colors.lightBlue,width: 3)),
     );
 
     ButtonStyle cancelButtonStyle = ButtonStyle(
@@ -35,7 +38,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
       foregroundColor: const MaterialStatePropertyAll(Colors.black),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0), 
+          borderRadius: BorderRadius.circular(0),
         ),
       ),
     );
@@ -45,7 +48,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
       foregroundColor: const MaterialStatePropertyAll(Colors.black),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0), 
+          borderRadius: BorderRadius.circular(0),
         ),
       ),
     );
@@ -58,13 +61,23 @@ class _SelectDepartmentState extends State<SelectDepartment> {
   
     double buttonWidth = MediaQuery.of(context).size.width * 0.4;
     EdgeInsets buttonPadding = const EdgeInsets.all(8.0);
-    EdgeInsets underPadding = const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
-    List<String> department = ['内科',      '小児科',
-                               '皮膚科',    '精神科',
-                               '外科',      '産婦人科',
-                               '眼科',      '耳鼻咽喉科',
-                               '泌尿器科',  '脳神経外科',
-                               '形成外科',  '整形外科'];
+    var appState = context.watch<ApplicationState>();
+    EdgeInsets underPadding =
+        const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
+    List<String> department = [
+      '内科',
+      '小児科',
+      '皮膚科',
+      '精神科',
+      '外科',
+      '産婦人科',
+      '眼科',
+      '耳鼻咽喉科',
+      '泌尿器科',
+      '脳神経外科',
+      '形成外科',
+      '整形外科'
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,16 +108,18 @@ class _SelectDepartmentState extends State<SelectDepartment> {
           ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children:[
+          children: [
             Padding(
               padding: underPadding,
               child: SizedBox(
+                width: buttonWidth,
                 child: ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
                       selected.clear();
-                      print(selected);
-                    });},
+                      //print(selected);
+                    });
+                  },
                   icon: const Icon(Icons.close),
                   label: const Text('キャンセル'),
                   style: cancelButtonStyle,
@@ -116,9 +131,12 @@ class _SelectDepartmentState extends State<SelectDepartment> {
               child: SizedBox(
                 width: buttonWidth,
                 child: ElevatedButton.icon(
-                  onPressed: () {print(selected);},
+                  onPressed: () {
+                    print(selected.length);
+                    appState.screenId = 2;
+                  },
                   icon: const Icon(Icons.send),
-                  label: const Text('送信'),
+                  label: selected.isNotEmpty ? Text('送信 ${selected.length}') : const Text('送信'),
                   style: sendButtonStyle,
                 ),
               ),
