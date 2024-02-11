@@ -20,8 +20,20 @@ class TopPage extends StatelessWidget {
             onPressed: () => Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SignInPage('Google')))),
         if (appState.loggedIn) Text('Logged In!'),
-        SignOutButton(),
+        ElevatedButton.icon(
+            onPressed: () => logout(),
+            icon: Icon(Icons.logout),
+            label: Text('Sign out')),
       ],
     );
+  }
+
+  Future<void> logout() async {
+    final googleSignIn = GoogleSignIn();
+    if (await googleSignIn.isSignedIn()) {
+      await googleSignIn.signOut();
+    }
+
+    return FirebaseAuth.instance.signOut();
   }
 }
