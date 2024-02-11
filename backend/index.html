@@ -44,9 +44,8 @@
   <!-- JQuery -->
 
   <!--googlemapAPI-->
-  <script src="http://maps.google.com/maps/api/js?key=AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA
-  &language=ja"></script>
-
+  <script src="http://maps.google.com/maps/api/js?key=AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA&language=ja"></script>
+  <!--googlemapAPI-->
 
 <!--** 以下Firebase **-->
 <script type="module">
@@ -102,10 +101,8 @@
       ambulance : '0616',
       status : 'progress'
     });
-
     const recDoc = await a.path;
     console.log(recDoc);
-
   });
 
   //緯度経度を用いて救急車から目的地の病院までの距離を算出し病院のリストを距離を注目し昇順にソートする関数
@@ -144,6 +141,7 @@
   //hospitalArrayの情報とすべて当てはまる病院を表示(AND検索)
   const hospitalArray = ['department.0', 'department.1','department.2']//仮に与えられたとする
   $("#searchAnd").on("click",async function(){
+    const start = performance.now();
     const hospitalRef = collection(db, "hospital");
     let queryAnd = query(hospitalRef, where(hospitalArray[0], "==", true));
     for ( var i = 1; i < hospitalArray.length; i++ ){
@@ -159,11 +157,14 @@
       console.log(hospitals[0].place.latitude);
     });
     calculateDistance(hospitals);//緯度経度から距離を算出する関数を実行
+    const end = performance.now();
+    console.log("処理時間",end-start,"ms");
   });
 
 
   //hospitalArrayの情報とひとつでも当てはまる病院を表示(OR検索)
   $("#searchOr").on("click",async function(){
+    const start = performance.now();
     const hospitalRef = collection(db, "hospital");
     let hospitalName = {} //空の辞書作成
     for ( var i = 0; i < hospitalArray.length; i++ ){
@@ -176,6 +177,8 @@
     console.log(hospitalName["高須クリニック0"])
     const hospitals = Object.values(hospitalName) // 辞書からvalue(病院data)の一覧を取得
     calculateDistance(hospitals);
+    const end = performance.now();
+    console.log("処理時間",end-start,"ms");
   });
 
   //病院のデータベース
