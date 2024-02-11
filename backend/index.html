@@ -11,6 +11,7 @@
 </style>
 </head>
 
+<!--ボタン表示-->
 <body>
   <div>
     <button id="dep00">内科</button>
@@ -25,8 +26,8 @@
     <button id="dep09">脳神経外科</button>
     <button id="dep10">形成外科</button>
     <button id="dep11">整形外科</button><br><br>
-    <button id="serchAnd">AND検索</button><br><br>
-    <button id="serchOr">OR検索</button><br><br>
+    <button id="searchAnd">AND検索</button><br><br>
+    <button id="searchOr">OR検索</button><br><br>
     <button id="submit">登録</button>
   </div>
   <br>
@@ -38,9 +39,13 @@
     <button id="update">更新</button>
   </div>
 
- <!-- JQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- JQuery -->
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- JQuery -->
+
+  <!--googlemapAPI-->
+  <script src="http://maps.google.com/maps/api/js?key=AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA
+  &language=ja"></script>
 
 
 <!--** 以下Firebase **-->
@@ -60,15 +65,13 @@
       messagingSenderId: "246901411650",
       appId: "1:246901411650:web:86d48bc20cb31ba88682db"
     };
-
   // Initialize Firebase
   const app = initializeApp(firebaseConfig); //firebaseにアクセス
   const db = getFirestore(app);  //データベースにアクセス
   const requestRef = collection(db, "request");
   console.log(requestRef);
 
-  //内科ボタンを押すと実行
-  //requestの直下にドキュメントとフィールドが自動生成される
+  //内科ボタンをクリックされると以下の関数が実行される。　リクエストを作成
   $("#dep00").on("click",async function() {
     const a =  await addDoc(requestRef,{
       patient : '0',
@@ -80,29 +83,70 @@
     console.log(recDoc);
 
   });
-  
-  //以下AND検索とOR検索に関する機能
-  const hospitalArray = ['department.0', 'department.1','department.2']//仮に与えられたとする
+
+  //緯度経度から距離を算出する関数（引数1:病院の場所緯度経度)
+  function calculateDistance(places) {
+    const origin = new google.maps.LatLng(35.5988, 139.6506); //都市大の位置
+    const destinations = [];
+    let hospitalList = []; // 二重配列 [[病院ドキュメント, その病院と都市大との距離]]
+    places.forEach(function(value){
+      let d = new google.maps.LatLng(value.place.latitude, value.place.longitude)
+      destinations.push(d)
+    })
+    console.log(destinations[0])
+
+    const service = new google.maps.DistanceMatrixService();
+    service.getDistanceMatrix({
+      origins: [origin],
+      destinations: destinations,
+      travelMode: 'DRIVING',
+    }, (response, status) => {
+      if (status === 'OK') {
+        for(let i = 0; i<destinations.length; i++){
+          const distance = response.rows[0].elements[i].distance.value;
+          hospitalList.push([places[i], distance]);//病院のdocと距離をリストにプッシュ
+        }
+      } else {
+        console.error('Error:', status);
+      }
+    });
+    console.log(hospitalList);
+    //hospitalList.sort((a, b) => a[1]-b[1] );
+    ///*
+    hospitalList.sort(function(a, b){
+      if (a[1] > b[1]) return 1;
+      if (a[1] < b[1]) return -1;
+      return 0;
+    })
+    //*/
+    console.log(hospitalList);
+  }
 
   //hospitalArrayの情報とすべて当てはまる病院を表示(AND検索)
-  $("#serchAnd").on("click",async function(){
+  const hospitalArray = ['department.0', 'department.1','department.2']//仮に与えられたとする
+  $("#searchAnd").on("click",async function(){
     const hospitalRef = collection(db, "hospital");
-    
-    //hospitalArray[0]がtrueとなるクエリを作成
     let queryAnd = query(hospitalRef, where(hospitalArray[0], "==", true));
     for ( var i = 1; i < hospitalArray.length; i++ ){
       queryAnd = query(queryAnd, where(hospitalArray[i], "==", true))
     };
 
+    const hospitals = []
     const querySnapshot = await getDocs(queryAnd);
     querySnapshot.forEach((doc) => { // 病院の情報を取得 & consoleに表示
       console.log(doc.id, " => ", doc.data());
       console.log(doc.data().name)//フィールド取得
+      hospitals.push(doc.data());//リストで返す
+      console.log(hospitals[0].place.latitude);
     });
+
+    calculateDistance(hospitals);//緯度経度から距離を算出する関数を実行
+
   });
 
-    //hospitalArrayの情報とひとつでも当てはまる病院を表示(OR検索)
-  $("#serchOr").on("click",async function(){
+
+  //hospitalArrayの情報とひとつでも当てはまる病院を表示(OR検索)
+  $("#searchOr").on("click",async function(){
     const hospitalRef = collection(db, "hospital");
     let hospitalName = {} //空の辞書作成
     for ( var i = 0; i < hospitalArray.length; i++ ){
@@ -112,18 +156,19 @@
         hospitalName[doc.data().name] = doc.data() // keyが重複した場合、後に追加したデータが優先される
       });
     };
-    console.log(hospitalName)
-    console.log(hospitalName['高須クリニック0'])
+    console.log(hospitalName["高須クリニック0"])
+    const hospitals = Object.values(hospitalName) // 辞書からvalue(病院data)の一覧を取得
+    calculateDistance(hospitals);
   });
-  
-  
+
+
   
   //病院のデータベース
   const hospitalData = {
     ID : '0000',
     address : 'japana',
     call : '08012345678',
-    name : '高須クリニック012',
+    name : '高須クリニック',
     place: new GeoPoint(35.6895, 139.6917),
     department: {
         0: false,
@@ -156,6 +201,7 @@
   const hospitalName = "AAA"
 
 
+  //病院の受け入れ人数変更
   $("#update").on("click",async function(){
     //病院名検索
     const hospitalRef = collection(db, "hospital");
