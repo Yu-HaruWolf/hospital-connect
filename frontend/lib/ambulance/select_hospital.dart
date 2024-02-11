@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/ambulance/hospital.dart';
-import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
+
+import 'hospital.dart';
+import '../app_state.dart';
+import '../custom_widgets/text_with_icon.dart';
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -118,35 +120,6 @@ class HospitalCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class TextWithIcon extends StatelessWidget {
-  const TextWithIcon({
-    super.key,
-    required this.textStyle,
-    required this.iconData,
-    required this.text,
-  });
-
-  final TextStyle textStyle;
-  final IconData iconData;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          iconData,
-          color: Colors.black38,
-        ),
-        Text(
-          text,
-          style: textStyle,
-        ),
-      ],
     );
   }
 }

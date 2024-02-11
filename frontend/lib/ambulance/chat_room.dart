@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../app_state.dart';
 
 String randomString() {
   final random = Random.secure();
