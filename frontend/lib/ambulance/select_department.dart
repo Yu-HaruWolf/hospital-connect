@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../app_state.dart';
 
 class SelectDepartment extends StatefulWidget {
   const SelectDepartment({super.key});

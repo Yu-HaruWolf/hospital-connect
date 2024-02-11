@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../custom_widgets/text_with_icon.dart';
+import '../app_state.dart';
 
 class HospitalDetails extends StatefulWidget {
   @override
@@ -137,34 +139,5 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     setState(() {
       hospitalStatus = statusNum;
     });
-  }
-}
-
-class TextWithIcon extends StatelessWidget {
-  const TextWithIcon({
-    super.key,
-    required this.textStyle,
-    required this.iconData,
-    required this.text,
-  });
-
-  final TextStyle textStyle;
-  final IconData iconData;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          iconData,
-          color: Colors.black38,
-        ),
-        Text(
-          text,
-          style: textStyle,
-        ),
-      ],
-    );
   }
 }
