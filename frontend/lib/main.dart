@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/custom_widgets/text_with_icon.dart';
 import 'package:provider/provider.dart';
 
 import 'ambulance/hospital_detail.dart';
@@ -71,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var appState = context.watch<ApplicationState>();
     Widget insideWidget;
     switch (appState.screenId) {
-      case -1:
+      case 0:
         insideWidget = TopPage();
         break;
       case 1:
@@ -96,6 +97,29 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: insideWidget,
+      ),
+      drawer: Drawer(
+        child: ListView(children: [
+          DrawerHeader(
+              child: Text('Drawer Header'),
+              decoration: BoxDecoration(
+                color: Colors.red,
+              )),
+          ListTile(
+            title: TextWithIcon(iconData: Icons.home, text: 'Home'),
+            onTap: () {
+              appState.screenId = 0;
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: TextWithIcon(iconData: Icons.search, text: 'Search'),
+            onTap: () {
+              appState.screenId = 1;
+              Navigator.pop(context);
+            },
+          ),
+        ]),
       ),
     );
   }

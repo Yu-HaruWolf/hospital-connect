@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class TextWithIcon extends StatelessWidget {
   const TextWithIcon({
     super.key,
-    required this.textStyle,
     required this.iconData,
     required this.text,
+    this.textStyle = const TextStyle(),
   });
 
   final TextStyle textStyle;
