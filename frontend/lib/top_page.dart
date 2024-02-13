@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/app_state.dart';
 import 'package:frontend/sign_in_page.dart';
@@ -22,8 +21,8 @@ class TopPage extends StatelessWidget {
         if (appState.loggedIn) Text('Logged In!'),
         ElevatedButton.icon(
             onPressed: () => logout(),
-            icon: Icon(Icons.logout),
-            label: Text('Sign out')),
+            icon: const Icon(Icons.logout),
+            label: const Text('Sign out')),
       ],
     );
   }
