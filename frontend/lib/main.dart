@@ -6,8 +6,11 @@ import 'ambulance/hospital_detail.dart';
 import 'ambulance/select_department.dart';
 import 'ambulance/select_hospital.dart';
 import 'ambulance/chat_room.dart';
+import 'hospital/setting_page.dart';
 import 'top_page.dart';
 import 'app_state.dart';
+import 'request_list_page.dart';
+import 'hospital/request_detail.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -75,17 +78,26 @@ class _MyHomePageState extends State<MyHomePage> {
       case 0:
         insideWidget = TopPage();
         break;
-      case 1:
+      case 1: /*  診療科選択  */
         insideWidget = const SelectDepartment();
         break;
-      case 2:
+      case 2: /*  搬送先一覧  */
         insideWidget = const SelectHospital();
         break;
-      case 3:
+      case 3: /*  病院の詳細画面  */
         insideWidget = HospitalDetails();
         break;
-      case 4:
+      case 4: /*  チャット  */
         insideWidget = ChatRoom();
+        break;
+      case 5: /*  診療科ごとの人数変更  */
+        insideWidget = SettingPage();
+        break;
+      case 6: /*  リクエスト一覧  */
+        insideWidget = RequestListPage();
+        break;
+      case 7: /*  リクエスト詳細画面  */
+        insideWidget = RequestDetail();
         break;
       default:
         insideWidget = const Text('正しいscreenIdを設定してください！');
@@ -116,6 +128,20 @@ class _MyHomePageState extends State<MyHomePage> {
             title: TextWithIcon(iconData: Icons.search, text: 'Search'),
             onTap: () {
               appState.screenId = 1;
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: TextWithIcon(iconData: Icons.settings, text: 'Settings'),
+            onTap: () {
+              appState.screenId = 5;
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: TextWithIcon(iconData: Icons.fact_check, text: 'Requests'),
+            onTap: () {
+              appState.screenId = 6;
               Navigator.pop(context);
             },
           ),
