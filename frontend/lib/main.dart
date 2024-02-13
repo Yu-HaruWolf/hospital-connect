@@ -5,6 +5,7 @@ import 'ambulance/hospital_detail.dart';
 import 'ambulance/select_department.dart';
 import 'ambulance/select_hospital.dart';
 import 'ambulance/chat_room.dart';
+import 'top_page.dart';
 import 'app_state.dart';
 
 void main() {
@@ -68,9 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
-    int screenId = appState.screenId; // 画面IDを指定
     Widget insideWidget;
-    switch (screenId) {
+    switch (appState.screenId) {
+      case -1:
+        insideWidget = TopPage();
+        break;
       case 1:
         insideWidget = const SelectDepartment();
         break;
