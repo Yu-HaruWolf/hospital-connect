@@ -19,29 +19,40 @@ class _SelectHospitalState extends State<SelectHospital> {
   List<Hospital> hospitals = [];
 
   @override
-  initState() {
-    super.initState();
-    loadHospitals();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (Hospital hospital in hospitals)
-            HospitalCard(
-              name: hospital.name,
-              address: hospital.address,
-              number: hospital.number,
-              id: hospital.id,
-            ),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        context.read<ApplicationState>().screenId = 1;
+      },
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+          future: loadHospitals(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error!');
+            }
+            if (!snapshot.hasData) {
+              return CircularProgressIndicator();
+            }
+            return Column(
+              children: [
+                for (Hospital hospital in hospitals)
+                  HospitalCard(
+                    name: hospital.name,
+                    address: hospital.address,
+                    number: hospital.number,
+                    id: hospital.id,
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Future<void> loadHospitals() async {
+  Future<bool> loadHospitals() async {
     List<Hospital> result = [];
     var value = await FirebaseFirestore.instance.collection('hospital').get();
     for (var docSnapshot in value.docs) {
@@ -58,6 +69,7 @@ class _SelectHospitalState extends State<SelectHospital> {
     setState(() {
       hospitals = result;
     });
+    return true;
   }
 
   // 関数定義
@@ -117,19 +129,6 @@ class HospitalCard extends StatelessWidget {
         onTap: () {
           appState.selectedHospitalId = id;
           appState.screenId = 3;
-          // Firebaseにアクセスするのはこんな感じ？
-          /*
-          FirebaseFirestore.instance.collection('hospital').get().then(
-            (value) {
-              print("Successfully completed");
-              for (var docSnapshot in value.docs) {
-                print('${docSnapshot.id} => ${docSnapshot.data()}');
-              }
-            },
-            onError: (e) => print("Error getting document: $e"),
-          );
-          */
-          //
         },
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,

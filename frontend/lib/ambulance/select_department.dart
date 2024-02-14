@@ -12,7 +12,13 @@ class SelectDepartment extends StatefulWidget {
 }
 
 class _SelectDepartmentState extends State<SelectDepartment> {
-  var selected = [];
+  late List<String> selected;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = context.read<ApplicationState>().selectedDepartments;
+  }
 
   void toggleSelected(var id) {
     if (selected.contains(id)) {
@@ -116,7 +122,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                       });
                     },
                     icon: const Icon(Icons.close),
-                    label: const Text('キャンセル'),
+                    label: const Text('クリア'),
                     style: cancelButtonStyle,
                   ),
                 ),
@@ -127,8 +133,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                   width: buttonWidth,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      print(selected);
-                      print(selected.length);
+                      appState.selectedDepartments = selected;
                       appState.screenId = 2;
                     },
                     icon: const Icon(Icons.send),

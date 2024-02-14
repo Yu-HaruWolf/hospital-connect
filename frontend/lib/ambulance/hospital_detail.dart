@@ -98,112 +98,118 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       fontSize: 20,
     );
 
-    return Column(
-      children: [
-        FutureBuilder(
-            future: docRef,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text('Error!');
-              }
-              if (!snapshot.hasData) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        appState.screenId = 2;
+      },
+      child: Column(
+        children: [
+          FutureBuilder(
+              future: docRef,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Error!');
+                }
+                if (!snapshot.hasData) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  );
+                }
+
+                final name = snapshot.data!.data()!.containsKey('name')
+                    ? snapshot.data!.data()!['name']
+                    : 'No Name';
+                final address = snapshot.data!.data()!.containsKey('address')
+                    ? snapshot.data!.data()!['address']
+                    : 'No Address';
+                final number = snapshot.data!.data()!.containsKey('call')
+                    ? snapshot.data!.data()!['call']
+                    : 'No call';
+                final GeoPoint geopoint =
+                    snapshot.data!.data()!.containsKey('place')
+                        ? snapshot.data!.data()!['place']
+                        : null;
+                late Marker marker;
+                late LatLng latLng;
+                if (geopoint != null) {
+                  latLng = LatLng(geopoint.latitude, geopoint.longitude);
+                  marker = Marker(
+                    markerId: MarkerId('0'),
+                    position: latLng,
+                  );
+                } else {
+                  latLng = LatLng(0, 0);
+                  marker = Marker(markerId: MarkerId('0'), position: latLng);
+                }
+                Set<Marker> markers = {};
+                markers.add(marker);
+                /*          hospital_info      */
+                return Column(
                   children: [
-                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: latLng,
+                          zoom: 15.0,
+                        ),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        markers: markers,
+                      ),
+                    ),
+                    TextWithIcon(
+                        textStyle: nameStyle,
+                        iconData: Icons.local_hospital_sharp,
+                        text: name),
+                    TextWithIcon(
+                        textStyle: normalStyle,
+                        iconData: Icons.domain,
+                        text: address),
+                    TextWithIcon(
+                        textStyle: normalStyle,
+                        iconData: Icons.call,
+                        text: number),
                   ],
                 );
-              }
+              }),
+          TextWithIcon(
+            textStyle: status_style,
+            iconData: Icons.send,
+            text: ('Status: ${statusMessage[hospitalStatus]}'),
+          ),
 
-              final name = snapshot.data!.data()!.containsKey('name')
-                  ? snapshot.data!.data()!['name']
-                  : 'No Name';
-              final address = snapshot.data!.data()!.containsKey('address')
-                  ? snapshot.data!.data()!['address']
-                  : 'No Address';
-              final number = snapshot.data!.data()!.containsKey('call')
-                  ? snapshot.data!.data()!['call']
-                  : 'No call';
-              final GeoPoint geopoint =
-                  snapshot.data!.data()!.containsKey('place')
-                      ? snapshot.data!.data()!['place']
-                      : null;
-              late Marker marker;
-              late LatLng latLng;
-              if (geopoint != null) {
-                latLng = LatLng(geopoint.latitude, geopoint.longitude);
-                marker = Marker(
-                  markerId: MarkerId('0'),
-                  position: latLng,
-                );
-              } else {
-                latLng = LatLng(0, 0);
-                marker = Marker(markerId: MarkerId('0'), position: latLng);
-              }
-              Set<Marker> markers = {};
-              markers.add(marker);
-/*          hospital_info      */
-              return Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: latLng,
-                        zoom: 15.0,
-                      ),
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
-                      markers: markers,
-                    ),
-                  ),
-                  TextWithIcon(
-                      textStyle: nameStyle,
-                      iconData: Icons.local_hospital_sharp,
-                      text: name),
-                  TextWithIcon(
-                      textStyle: normalStyle,
-                      iconData: Icons.domain,
-                      text: address),
-                  TextWithIcon(
-                      textStyle: normalStyle,
-                      iconData: Icons.call,
-                      text: number),
-                ],
-              );
-            }),
-        TextWithIcon(
-          textStyle: status_style,
-          iconData: Icons.send,
-          text: ('Status: ${statusMessage[hospitalStatus]}'),
-        ),
-
-/*          ボタン配置          */
-        ElevatedButton(
-          onPressed: () {
-            appState.screenId = 1;
-          },
-          child: const Text('Back'),
-          style: backstyle,
-        ),
-        ElevatedButton(
-          onPressed: () {
-            changeStatus(hospitalStatus == 0 ? 1 : 0);
-            createRequest(
-                appState.selectedHospitalId); // 診療科、病院のドキュメントID,救急車のID、progress
-          },
-          child: Text('Change Status'),
-          style: requeststyle,
-        ),
-        ElevatedButton(
-          onPressed: () {
-            appState.screenId = 4;
-          },
-          //icon: const Icon(Icons.chat),
-          child: Text('chat'),
-          style: chatstyle,
-        ),
-      ],
+          /*          ボタン配置          */
+          ElevatedButton(
+            onPressed: () {
+              appState.screenId = 2;
+            },
+            child: const Text('Back'),
+            style: backstyle,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              changeStatus(hospitalStatus == 0 ? 1 : 0);
+              createRequest(appState
+                  .selectedHospitalId); // 診療科、病院のドキュメントID,救急車のID、progress
+            },
+            child: Text('Change Status'),
+            style: requeststyle,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              appState.screenId = 4;
+            },
+            //icon: const Icon(Icons.chat),
+            child: Text('chat'),
+            style: chatstyle,
+          ),
+        ],
+      ),
     );
   }
 
