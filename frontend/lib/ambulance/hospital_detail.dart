@@ -126,15 +126,16 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                       ? snapshot.data!.data()!['place']
                       : null;
               late Marker marker;
-              late LatLng latlng;
+              late LatLng latLng;
               if (geopoint != null) {
+                latLng = LatLng(geopoint.latitude, geopoint.longitude);
                 marker = Marker(
                   markerId: MarkerId('0'),
-                  position: LatLng(geopoint.latitude, geopoint.longitude),
+                  position: latLng,
                 );
               } else {
-                marker =
-                    Marker(markerId: MarkerId('0'), position: LatLng(0, 0));
+                latLng = LatLng(0, 0);
+                marker = Marker(markerId: MarkerId('0'), position: latLng);
               }
               Set<Marker> markers = {};
               markers.add(marker);
@@ -145,8 +146,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                     height: MediaQuery.of(context).size.height * 0.5,
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(45, -122),
-                        zoom: 11.0,
+                        target: latLng,
+                        zoom: 15.0,
                       ),
                       myLocationEnabled: true,
                       myLocationButtonEnabled: true,

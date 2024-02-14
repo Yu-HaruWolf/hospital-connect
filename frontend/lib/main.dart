@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/custom_widgets/text_with_icon.dart';
 import 'package:provider/provider.dart';
@@ -73,6 +75,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
+    String? userName;
+    if (appState.loggedIn) {
+      if (FirebaseAuth.instance.currentUser!.displayName == null ||
+          FirebaseAuth.instance.currentUser!.displayName == "") {
+        userName = FirebaseAuth.instance.currentUser!.email!;
+      } else {
+        userName = FirebaseAuth.instance.currentUser!.displayName!;
+      }
+    }
     Widget insideWidget;
     switch (appState.screenId) {
       case 0:
@@ -113,10 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(children: [
           DrawerHeader(
-              child: Text('Drawer Header'),
               decoration: BoxDecoration(
-                color: Colors.red,
-              )),
+                color: Colors.redAccent,
+              ),
+              child: appState.loggedIn
+                  ? Text('Hello, ${userName!}!')
+                  : Text('Please sign in.')),
           ListTile(
             title: TextWithIcon(iconData: Icons.home, text: 'Home'),
             onTap: () {
