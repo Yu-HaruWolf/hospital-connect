@@ -62,6 +62,14 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 診療科選択ステート
+  List<String> _selectedDepartments = [];
+  List<String> get selectedDepartments => _selectedDepartments;
+  set selectedDepartments(List<String> departments) {
+    _selectedDepartments = departments;
+    notifyListeners();
+  }
+
   // 病院選択ステート
   var _selectedHospitalId = "";
   String get selectedHospitalId => _selectedHospitalId;

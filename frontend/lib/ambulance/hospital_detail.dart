@@ -18,6 +18,9 @@ class _HospitalDetailsState extends State<HospitalDetails> {
   Position? currentPosition;
   late StreamSubscription<Position> positionStream;
 
+  int hospitalStatus = 0;
+  List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
+
   final LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: 100,
@@ -43,8 +46,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     });
   }
 
-  int hospitalStatus = 0;
-  List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
+  //関数作成
+  void createRequest(String hospitalId) {}
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +189,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         ElevatedButton(
           onPressed: () {
             changeStatus(hospitalStatus == 0 ? 1 : 0);
+            createRequest(
+                appState.selectedHospitalId); // 診療科、病院のドキュメントID,救急車のID、progress
           },
           child: Text('Change Status'),
           style: requeststyle,
