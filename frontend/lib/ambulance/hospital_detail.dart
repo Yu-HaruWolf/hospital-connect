@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_widgets/text_with_icon.dart';
@@ -11,6 +15,34 @@ class HospitalDetails extends StatefulWidget {
 }
 
 class _HospitalDetailsState extends State<HospitalDetails> {
+  Position? currentPosition;
+  late StreamSubscription<Position> positionStream;
+
+  final LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 100,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    Future(() async {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        await Geolocator.requestPermission();
+      }
+    });
+
+    positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) {
+      currentPosition = position;
+      print(position == null
+          ? 'Unknown'
+          : '${position.latitude.toString()}, ${position.longitude.toString()}');
+    });
+  }
+
   int hospitalStatus = 0;
   List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
 
@@ -72,7 +104,12 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                 return const Text('Error!');
               }
               if (!snapshot.hasData) {
-                return const Text('Loading');
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                  ],
+                );
               }
 
               final name = snapshot.data!.data()!.containsKey('name')
@@ -84,9 +121,38 @@ class _HospitalDetailsState extends State<HospitalDetails> {
               final number = snapshot.data!.data()!.containsKey('call')
                   ? snapshot.data!.data()!['call']
                   : 'No call';
+              final GeoPoint geopoint =
+                  snapshot.data!.data()!.containsKey('place')
+                      ? snapshot.data!.data()!['place']
+                      : null;
+              late Marker marker;
+              late LatLng latlng;
+              if (geopoint != null) {
+                marker = Marker(
+                  markerId: MarkerId('0'),
+                  position: LatLng(geopoint.latitude, geopoint.longitude),
+                );
+              } else {
+                marker =
+                    Marker(markerId: MarkerId('0'), position: LatLng(0, 0));
+              }
+              Set<Marker> markers = {};
+              markers.add(marker);
 /*          hospital_info      */
               return Column(
                 children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(45, -122),
+                        zoom: 11.0,
+                      ),
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      markers: markers,
+                    ),
+                  ),
                   TextWithIcon(
                       textStyle: nameStyle,
                       iconData: Icons.local_hospital_sharp,

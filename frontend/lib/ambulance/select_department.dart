@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:frontend/ambulance/department.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
@@ -64,20 +63,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
     var appState = context.watch<ApplicationState>();
     EdgeInsets underPadding =
         const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
-    List<String> department = [
-      '内科',
-      '小児科',
-      '皮膚科',
-      '精神科',
-      '外科',
-      '産婦人科',
-      '眼科',
-      '耳鼻咽喉科',
-      '泌尿器科',
-      '脳神経外科',
-      '形成外科',
-      '整形外科'
-    ];
+    List<Department> department = appState.departments;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -94,14 +80,15 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                     child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          toggleSelected(i * 2 + j);
+                          toggleSelected(department.elementAt(i * 2 + j).id);
                         });
                       },
-                      style: selected.contains(i * 2 + j)
-                          ? selectedButtonStyle
-                          : buttonStyle,
+                      style:
+                          selected.contains(department.elementAt(i * 2 + j).id)
+                              ? selectedButtonStyle
+                              : buttonStyle,
                       child: Text(
-                        department.elementAt(i * 2 + j),
+                        department.elementAt(i * 2 + j).name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
