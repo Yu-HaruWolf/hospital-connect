@@ -46,8 +46,29 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     });
   }
 
-  //関数作成
-  void createRequest(String hospitalId) {}
+  //関数作成 // 診療科(複数こ)、病院のドキュメントID,救急車のUserUID、progress
+  void createRequest(String hospitalId) {
+    /*
+    Firestore.instance.collection('request').docuent().setData({
+      'ambulance' : 'yoshidaTest',
+      'hospital' : hospitalId,
+      'status' : "pending",
+      'patient' : {"/department/department02", "/department/department01"} //参照にはなっていない
+    })
+    */
+    const patientNames = {"department02", "department01"}
+    const patientDocumetRefs = {}
+    patientsName.forEach((value){
+      patientDocumentRefs.push(FirebaseFirestore.instance.collection('department').doc('value'))
+    })
+    FirebaseFirestore.instance.collection('request').add(
+      "ambulance" : 'yoshidaTest',
+      "hospital" : hospitalId,
+      "status" : 'pending',
+      "patient" : patientDocumentRefs
+    )
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +216,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
             onPressed: () {
               changeStatus(hospitalStatus == 0 ? 1 : 0);
               createRequest(appState
-                  .selectedHospitalId); // 診療科、病院のドキュメントID,救急車のID、progress
+                  .selectedHospitalId); // 診療科(複数こ)、病院のドキュメントID,救急車のUserUID、progress
             },
             child: Text('Change Status'),
             style: requeststyle,
