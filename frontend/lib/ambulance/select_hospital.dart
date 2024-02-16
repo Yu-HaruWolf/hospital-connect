@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import 'hospital.dart';
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; 
+import 'dart:convert';
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -31,10 +30,10 @@ class _SelectHospitalState extends State<SelectHospital> {
           future: loadHospitals(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text('Error!');
+              return const Text('Error!');
             }
             if (!snapshot.hasData) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             }
             return Column(
               children: [
@@ -80,10 +79,10 @@ class _SelectHospitalState extends State<SelectHospital> {
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
-  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async{
-    List<Map<String,dynamic>> hospitalList = [];
-    String apiKey ='AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA'; 
-    hospitalDocList.forEach((value) async{
+  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async {
+    List<Map<String, dynamic>> hospitalList = [];
+    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
+    hospitalDocList.forEach((value) async {
       double originLat = value.place.latitude;
       double originLng = value.place.longitude;
       double destLat = origin[0];
@@ -95,15 +94,13 @@ class _SelectHospitalState extends State<SelectHospital> {
           '&destinations=$destLat,$destLng'
           '&mode=$mode'
           '&key=$apiKey';
-       final response = await http.get(Uri.parse(url));
-       final responseBody = response.body;
+      final response = await http.get(Uri.parse(url));
+      final responseBody = response.body;
       // TODO : リンクから距離を取得してソートする
       Map<String, dynamic> responseData = json.decode(responseBody);
-      int distanceValue = responseData['row'][0]['elements'][0]['distance']['value'];
-      hospitalList.add({
-        'place' : value,
-        'distance':distanceValue
-      });
+      int distanceValue =
+          responseData['row'][0]['elements'][0]['distance']['value'];
+      hospitalList.add({'place': value, 'distance': distanceValue});
     });
     //ソート
     hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));

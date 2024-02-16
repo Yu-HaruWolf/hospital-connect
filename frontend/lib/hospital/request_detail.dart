@@ -7,10 +7,10 @@ class RequestDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextWithIcon(iconData: Icons.phone, text: '000000000'),
-        TextWithIcon(iconData: Icons.domain, text: 'Departments'),
-        ElevatedButton(onPressed: () {}, child: Text('Approve')),
-        ElevatedButton(onPressed: () {}, child: Text('Chat')),
+        const TextWithIcon(iconData: Icons.phone, text: '000000000'),
+        const TextWithIcon(iconData: Icons.domain, text: 'Departments'),
+        ElevatedButton(onPressed: () {}, child: const Text('Approve')),
+        ElevatedButton(onPressed: () {}, child: const Text('Chat')),
       ],
     );
   }

@@ -49,7 +49,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
   void onTapped(int index) {
     var appState = context
         .read<ApplicationState>(); // context.watch() を context.read() に変更
@@ -60,8 +59,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (index == 1) {
       appState.screenId = 4;
     }
-
-    print(appState.screenId); // デバッグ用に screenId を出力
   }
 
   @override
@@ -79,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget insideWidget;
     switch (appState.screenId) {
       case 0:
-        insideWidget = TopPage();
+        insideWidget = const TopPage();
         break;
       case 1: /*  診療科選択  */
         insideWidget = const SelectDepartment();
@@ -91,13 +88,13 @@ class _MyHomePageState extends State<MyHomePage> {
         insideWidget = HospitalDetails();
         break;
       case 4: /*  チャット  */
-        insideWidget = ChatRoom();
+        insideWidget = const ChatRoom();
         break;
       case 5: /*  診療科ごとの人数変更  */
-        insideWidget = SettingPage();
+        insideWidget = const SettingPage();
         break;
       case 6: /*  リクエスト一覧  */
-        insideWidget = RequestListPage();
+        insideWidget = const RequestListPage();
         break;
       case 7: /*  リクエスト詳細画面  */
         insideWidget = RequestDetail();
@@ -117,28 +114,31 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(children: [
           DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.redAccent,
               ),
               child: Column(
                 children: [
                   appState.loggedIn
                       ? Text('Hello, ${userName!}!')
-                      : Text('Please sign in.'),
-                  if (appState.userType == -1) Text('You are unauthorized.'),
-                  if (appState.userType == 1) Text('You are rescue team.'),
-                  if (appState.userType == 2) Text('You are hospital staff.'),
+                      : const Text('Please sign in.'),
+                  if (appState.userType == -1)
+                    const Text('You are unauthorized.'),
+                  if (appState.userType == 1)
+                    const Text('You are rescue team.'),
+                  if (appState.userType == 2)
+                    const Text('You are hospital staff.'),
                 ],
               )),
           ListTile(
-              title: TextWithIcon(iconData: Icons.home, text: 'Home'),
+              title: const TextWithIcon(iconData: Icons.home, text: 'Home'),
               onTap: () {
                 Navigator.pop(context);
                 appState.screenId = 0;
               }),
           if (appState.userType == 1)
             ListTile(
-              title: TextWithIcon(iconData: Icons.search, text: 'Search'),
+              title: const TextWithIcon(iconData: Icons.search, text: 'Search'),
               onTap: () {
                 Navigator.pop(context);
                 appState.screenId = 1;
@@ -146,7 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           if (appState.userType == 2)
             ListTile(
-              title: TextWithIcon(iconData: Icons.settings, text: 'Settings'),
+              title: const TextWithIcon(
+                  iconData: Icons.settings, text: 'Settings'),
               onTap: () {
                 Navigator.pop(context);
                 appState.screenId = 5;
@@ -154,7 +155,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           if (appState.userType != -1)
             ListTile(
-              title: TextWithIcon(iconData: Icons.fact_check, text: 'Requests'),
+              title: const TextWithIcon(
+                  iconData: Icons.fact_check, text: 'Requests'),
               onTap: () {
                 Navigator.pop(context);
                 appState.screenId = 6;
@@ -169,7 +171,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: Icon(Icons.reply_outlined), label: '戻る'),
                 BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'チャット'),
               ],
-              currentIndex: _selectedIndex,
               selectedItemColor: Colors.black,
               selectedFontSize: 20,
               unselectedFontSize: 20,

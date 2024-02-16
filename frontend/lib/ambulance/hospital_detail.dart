@@ -71,7 +71,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       ),
     );
 
-    /*    text_style    */
+    /*    Text Style    */
     TextStyle nameStyle = const TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       fontSize: 20,
     );
 
-    TextStyle status_style = TextStyle(
+    TextStyle statusStyle = TextStyle(
       fontSize: 25,
       color: hospitalStatus == 0 ? Colors.red : Colors.green,
     );
@@ -99,7 +99,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                   return const Text('Error!');
                 }
                 if (!snapshot.hasData) {
-                  return Row(
+                  return const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(),
@@ -116,53 +116,51 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                 final number = snapshot.data!.data()!.containsKey('call')
                     ? snapshot.data!.data()!['call']
                     : 'No call';
-                final GeoPoint geopoint =
+                final GeoPoint? geopoint =
                     snapshot.data!.data()!.containsKey('place')
                         ? snapshot.data!.data()!['place']
                         : null;
                 late Marker marker;
                 late LatLng latLng;
+                Set<Marker> markers = {};
                 if (geopoint != null) {
                   latLng = LatLng(geopoint.latitude, geopoint.longitude);
                   marker = Marker(
-                    markerId: MarkerId('0'),
+                    markerId: const MarkerId('0'),
                     position: latLng,
                   );
-                } else {
-                  latLng = LatLng(0, 0);
-                  marker = Marker(markerId: MarkerId('0'), position: latLng);
+                  markers.add(marker);
                 }
-                Set<Marker> markers = {};
-                markers.add(marker);
                 /*          hospital_info      */
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: latLng,
-                          zoom: 15.0,
+                    if (geopoint != null)
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: latLng,
+                            zoom: 15.0,
+                          ),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          markers: markers,
                         ),
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                        markers: markers,
                       ),
-                    ),
                     Text(
                       name,
                       style: nameStyle,
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 20),
+                      padding: const EdgeInsets.only(left: 20),
                       child: TextWithIcon(
                           textStyle: normalStyle,
                           iconData: Icons.domain,
                           text: address),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 20),
+                      padding: const EdgeInsets.only(left: 20),
                       child: TextWithIcon(
                           textStyle: normalStyle,
                           iconData: Icons.call,
@@ -174,21 +172,21 @@ class _HospitalDetailsState extends State<HospitalDetails> {
           Row(children: [
             // TODO: レイアウト確認 画面をオーバーすることあり
             Padding(
-              padding: EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: 10),
               child: TextWithIcon(
-                textStyle: status_style,
+                textStyle: statusStyle,
                 iconData: Icons.send,
                 text: ('Status: ${statusMessage[hospitalStatus]}'),
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 10, left: 20),
+              padding: const EdgeInsets.only(top: 10, left: 20),
               child: ElevatedButton(
                 onPressed: () {
                   changeStatus(hospitalStatus == 0 ? 1 : 0);
                 },
-                child: Text(hospitalStatus == 0 ? 'Request' : 'cancel'),
                 style: requeststyle,
+                child: Text(hospitalStatus == 0 ? 'Request' : 'cancel'),
               ),
             ),
           ])

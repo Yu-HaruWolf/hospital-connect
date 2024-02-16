@@ -6,7 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 class SignInPage extends StatelessWidget {
-  SignInPage(this.signInMethod);
+  SignInPage(this.signInMethod, {super.key});
   String signInMethod;
 
   @override
@@ -24,11 +24,11 @@ class SignInPage extends StatelessWidget {
         insideWidget = Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
+            const CircularProgressIndicator(),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.02,
             ),
-            Text('Loading')
+            const Text('Loading')
           ],
         );
       case 'Email':
