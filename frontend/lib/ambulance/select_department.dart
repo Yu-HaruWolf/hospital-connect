@@ -12,7 +12,13 @@ class SelectDepartment extends StatefulWidget {
 }
 
 class _SelectDepartmentState extends State<SelectDepartment> {
-  var selected = [];
+  late List<String> selected;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = context.read<ApplicationState>().selectedDepartments;
+  }
 
   void toggleSelected(var id) {
     if (selected.contains(id)) {
@@ -65,78 +71,83 @@ class _SelectDepartmentState extends State<SelectDepartment> {
         const EdgeInsets.only(top: 30, right: 8, bottom: 8, left: 8);
     List<Department> department = appState.departments;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for (int i = 0; i < department.length / 2; i++)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (int j = 0; j < 2 && (i * 2 + j < department.length); j++)
-                Padding(
-                  padding: buttonPadding,
-                  child: SizedBox(
-                    width: buttonWidth,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          toggleSelected(department.elementAt(i * 2 + j).id);
-                        });
-                      },
-                      style:
-                          selected.contains(department.elementAt(i * 2 + j).id)
-                              ? selectedButtonStyle
-                              : buttonStyle,
-                      child: Text(
-                        department.elementAt(i * 2 + j).name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        appState.screenId = 0;
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (int i = 0; i < department.length / 2; i++)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (int j = 0; j < 2 && (i * 2 + j < department.length); j++)
+                  Padding(
+                    padding: buttonPadding,
+                    child: SizedBox(
+                      width: buttonWidth,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            toggleSelected(department.elementAt(i * 2 + j).id);
+                          });
+                        },
+                        style: selected
+                                .contains(department.elementAt(i * 2 + j).id)
+                            ? selectedButtonStyle
+                            : buttonStyle,
+                        child: Text(
+                          department.elementAt(i * 2 + j).name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
+              ],
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: underPadding,
+                child: SizedBox(
+                  width: buttonWidth,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        selected.clear();
+                        //print(selected);
+                      });
+                    },
+                    icon: const Icon(Icons.close),
+                    label: const Text('クリア'),
+                    style: cancelButtonStyle,
+                  ),
                 ),
+              ),
+              Padding(
+                padding: underPadding,
+                child: SizedBox(
+                  width: buttonWidth,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      appState.selectedDepartments = selected;
+                      appState.screenId = 2;
+                    },
+                    icon: const Icon(Icons.send),
+                    label: selected.isNotEmpty
+                        ? Text('送信 ${selected.length}')
+                        : const Text('送信'),
+                    style: sendButtonStyle,
+                  ),
+                ),
+              ),
             ],
           ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: underPadding,
-              child: SizedBox(
-                width: buttonWidth,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      selected.clear();
-                      //print(selected);
-                    });
-                  },
-                  icon: const Icon(Icons.close),
-                  label: const Text('キャンセル'),
-                  style: cancelButtonStyle,
-                ),
-              ),
-            ),
-            Padding(
-              padding: underPadding,
-              child: SizedBox(
-                width: buttonWidth,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    print(selected);
-                    print(selected.length);
-                    appState.screenId = 2;
-                  },
-                  icon: const Icon(Icons.send),
-                  label: selected.isNotEmpty
-                      ? Text('送信 ${selected.length}')
-                      : const Text('送信'),
-                  style: sendButtonStyle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

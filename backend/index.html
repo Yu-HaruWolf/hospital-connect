@@ -11,23 +11,6 @@
 </style>
 </head>
 
-<!-- コンテンツ表示画面 -->
-
-<!--<div>
-    <div> 名前：<input type="text" id="uname"> </div>
-    <div>
-        <textarea id="text" cols="30" rows="10"></textarea>
-        <button id="send">送信</button>
-        <br>
-        <button id="send">送信</button>
-    </div>
-    <div>
-      <img id="image" src="" alt="画像">
-    </div>
-    <div id="output" style="overflow: auto;height: 700px;"> </div>
-</div>-->
-<!--/ コンテンツ表示画面 -->
-
 <!--ボタン表示-->
 <body>
   <div>
@@ -43,8 +26,11 @@
     <button id="dep09">脳神経外科</button>
     <button id="dep10">形成外科</button>
     <button id="dep11">整形外科</button><br><br>
-    <button id="serch">検索</button><br><br>
+    <button id="searchAnd">AND検索</button><br><br>
+    <button id="searchOr">OR検索</button><br><br>
     <button id="submit">登録</button>
+
+
   </div>
   <br>
   <!--病院受け入れ人数更新-->
@@ -55,125 +41,15 @@
     <button id="update">更新</button>
   </div>
 
- <!-- JQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- JQuery -->
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- JQuery -->
 
+  <!--googlemapAPI-->
+  <script async src="http://maps.google.com/maps/api/js?key=AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA&language=ja"></script>
+  <!--googlemapAPI-->
 
 <!--** 以下Firebase **-->
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js';
-  import { getFirestore,collection, addDoc,getDoc,getDocs,query, where,GeoPoint,doc} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-  
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-      apiKey: "AIzaSyCAXeaS9p1P4gnyywlx4E20zoO6jxjaeWs",
-      authDomain: "tcu-rescue.firebaseapp.com",
-      projectId: "tcu-rescue",
-      storageBucket: "tcu-rescue.appspot.com",
-      messagingSenderId: "246901411650",
-      appId: "1:246901411650:web:86d48bc20cb31ba88682db"
-    };
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig); //firebaseにアクセス
-  const db = getFirestore(app);  //データベースにアクセス
-  const requestRef = collection(db, "request");
-  console.log(requestRef);
-
-  //内科ボタンをクリックされると以下の関数が実行される。　リクエストを作成
-  $("#dep00").on("click",async function() {
-    const a =  await addDoc(requestRef,{
-      patient : '0',
-      ambulance : '0616',
-      status : 'progress'
-    });
-
-    const recDoc = await a.path;
-    console.log(recDoc);
-
-
-  //すべてのドキュメントを取得
-   /*async function f1(){  
-    const querySnapshot = await getDocs(requestRef);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-      });
-     };
-.path
-   f1();
-   console(dog.id);*/
-  });
-
-  //patient0の情報を基に病院を検索
-  $("#serch").on("click",async function(){
-    const hospitalRef = collection(db, "hospital");
-    const q = query(hospitalRef, where("department.0", "==", true));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => { // 病院の情報を取得 & consoleに表示
-      console.log(doc.id, " => ", doc.data());
-      console.log(doc.data().name)//フィールド取得
-    });
-  });
-
-  //病院のデータベース
-  const hospitalData = {
-    ID : '0000',
-    address : 'japana',
-    call : '08012345678',
-    name : '高須クリニック',
-    place: new GeoPoint(35.6895, 139.6917),
-    department: {
-        0: false,
-        1: false,
-        2: false,
-        3: false,
-        4: false,
-        5: false,
-        6: false,
-        7: false,
-        8: false,
-        9: false,
-        10: false,
-        11: false
-    },
-    numOfAccepted : 10
-  };
-
-  //病院を新規に登録
-  $("#submit").on("click",async function() {
-    await addDoc(collection(db,"hospital"),hospitalData)
-      .then(() => {
-        console.log("Document successfully written!");
-      })
-      .catch((error) => {
-        console.error("Error writing doccument :",error);
-      });
-  });
-  //病院に通知
-  const hospitalName = "AAA"
-
-
-  //病院の受け入れ人数変更
-  $("#update").on("click",async function(){
-    const hospitalRef = collection(db, "hospital");
-    const serchHospital = document.getElementById("hospitalName").value;
-    const q = query(hospitalRef, where("name", "==", serchHospital ));
-    const querySnapshot = await getDocs(q);
-    console.log(querySnapshot);
-    querySnapshot.forEach((doc) => { // 病院の情報を取得 & consoleに表示
-      console.log(doc.id, " => ", doc.data());
-      console.log(doc.data().numOfAccepted)//フィールド取得
-    });
-    /*
-    Ref.update({
-      numOfAccepted: 20
-    })
-    */
-  })
-</script>
+<script type="module" src="index.js"></script>
 </body>
 </html>

@@ -7,16 +7,22 @@ import 'custom_widgets/text_with_icon.dart';
 class RequestListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (int i = 0; i < 5; i++)
-            HospitalCard(
-                title: 'Title',
-                department: 'Department',
-                lastUpdateTime: '2000/1/1 12:34:56',
-                id: 'aaa'),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        context.read<ApplicationState>().screenId = 0;
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            for (int i = 0; i < 5; i++)
+              HospitalCard(
+                  title: 'Title',
+                  department: 'Department',
+                  lastUpdateTime: '2000/1/1 12:34:56',
+                  id: 'aaa'),
+          ],
+        ),
       ),
     );
   }

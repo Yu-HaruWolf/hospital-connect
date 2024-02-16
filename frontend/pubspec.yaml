@@ -44,6 +44,7 @@ dependencies:
   firebase_ui_auth: ^1.13.0
   google_maps_flutter: ^2.5.3
   geolocator: ^10.1.1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

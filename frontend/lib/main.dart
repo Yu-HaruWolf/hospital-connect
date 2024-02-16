@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:frontend/custom_widgets/text_with_icon.dart';
@@ -92,6 +94,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
+    String? userName;
+    if (appState.loggedIn) {
+      if (FirebaseAuth.instance.currentUser!.displayName == null ||
+          FirebaseAuth.instance.currentUser!.displayName == "") {
+        userName = FirebaseAuth.instance.currentUser!.email!.split(('@'))[0];
+      } else {
+        userName = FirebaseAuth.instance.currentUser!.displayName!;
+      }
+    }
     Widget insideWidget;
     switch (appState.screenId) {
       case 0:
@@ -133,38 +144,49 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(children: [
           DrawerHeader(
-              child: Text('Drawer Header'),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: Colors.redAccent,
+              ),
+              child: Column(
+                children: [
+                  appState.loggedIn
+                      ? Text('Hello, ${userName!}!')
+                      : Text('Please sign in.'),
+                  if (appState.userType == -1) Text('You are unauthorized.'),
+                  if (appState.userType == 1) Text('You are rescue team.'),
+                  if (appState.userType == 2) Text('You are hospital staff.'),
+                ],
               )),
           ListTile(
-            title: TextWithIcon(iconData: Icons.home, text: 'Home'),
-            onTap: () {
-              appState.screenId = 0;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.search, text: 'Search'),
-            onTap: () {
-              appState.screenId = 1;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.settings, text: 'Settings'),
-            onTap: () {
-              appState.screenId = 5;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.fact_check, text: 'Requests'),
-            onTap: () {
-              appState.screenId = 6;
-              Navigator.pop(context);
-            },
-          ),
+              title: TextWithIcon(iconData: Icons.home, text: 'Home'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 0;
+              }),
+          if (appState.userType == 1)
+            ListTile(
+              title: TextWithIcon(iconData: Icons.search, text: 'Search'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 1;
+              },
+            ),
+          if (appState.userType == 2)
+            ListTile(
+              title: TextWithIcon(iconData: Icons.settings, text: 'Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 5;
+              },
+            ),
+          if (appState.userType != -1)
+            ListTile(
+              title: TextWithIcon(iconData: Icons.fact_check, text: 'Requests'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 6;
+              },
+            ),
         ]),
       ),
 
