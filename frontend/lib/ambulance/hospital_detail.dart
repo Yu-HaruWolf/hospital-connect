@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -58,13 +57,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         .collection('hospital')
         .doc(appState.selectedHospitalId)
         .get();
-/*    button_style    */
-    ButtonStyle backstyle = const ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
-    );
 
+    /*    button_style    */
     ButtonStyle requeststyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll(Colors.white),
       foregroundColor: const MaterialStatePropertyAll(Colors.black),
@@ -77,19 +71,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       ),
     );
 
-    ButtonStyle chatstyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll(Colors.white),
-      foregroundColor: const MaterialStatePropertyAll(Colors.black),
-      side: const MaterialStatePropertyAll(
-          BorderSide(color: Colors.black, width: 2)),
-      shape: MaterialStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
-      ),
-    );
-
-/*    text_style    */
+    /*    text_style    */
     TextStyle nameStyle = const TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
