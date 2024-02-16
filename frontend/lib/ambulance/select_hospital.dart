@@ -7,7 +7,7 @@ import 'hospital.dart';
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; 
+import 'dart:convert';
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -28,7 +28,7 @@ class _SelectHospitalState extends State<SelectHospital> {
       },
       child: SingleChildScrollView(
         child: FutureBuilder(
-          future: loadHospitals(),
+          future: getSortedHospitalList([35.73550690100909, 139.8005679376201]),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text('Error!');
@@ -36,6 +36,19 @@ class _SelectHospitalState extends State<SelectHospital> {
             if (!snapshot.hasData) {
               return CircularProgressIndicator();
             }
+            return Column(
+              // TODO : 表示したい内容を変更（距離とか）
+              children: [
+                for (dynamic value in snapshot.data!)
+                  HospitalCard(
+                    id: '0',
+                    name: 'name',
+                    address: 'address',
+                    number: value['distance'].toString(),
+                  )
+              ],
+            );
+            /*
             return Column(
               children: [
                 for (Hospital hospital in hospitals)
@@ -47,6 +60,7 @@ class _SelectHospitalState extends State<SelectHospital> {
                   ),
               ],
             );
+            */
           },
         ),
       ),
@@ -80,12 +94,14 @@ class _SelectHospitalState extends State<SelectHospital> {
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
-  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async{
-    List<Map<String,dynamic>> hospitalList = [];
-    String apiKey ='AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA'; 
-    hospitalDocList.forEach((value) async{
-      double originLat = value.place.latitude;
-      double originLng = value.place.longitude;
+  Future<List<dynamic>> getSortedHospitalList(origin) async {
+    var snapshot =
+        await FirebaseFirestore.instance.collection('hospital').get();
+    List<Map<String, dynamic>> hospitalList = [];
+    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
+    await Future.forEach(snapshot.docs, (value) async {
+      double originLat = value['place'].latitude;
+      double originLng = value['place'].longitude;
       double destLat = origin[0];
       double destLng = origin[1];
       String mode = 'driving';
@@ -95,15 +111,13 @@ class _SelectHospitalState extends State<SelectHospital> {
           '&destinations=$destLat,$destLng'
           '&mode=$mode'
           '&key=$apiKey';
-       final response = await http.get(Uri.parse(url));
-       final responseBody = response.body;
-      // TODO : リンクから距離を取得してソートする
+      final response = await http.get(Uri.parse(url));
+      final responseBody = response.body;
+      // リンクから距離を取得してソートする
       Map<String, dynamic> responseData = json.decode(responseBody);
-      int distanceValue = responseData['row'][0]['elements'][0]['distance']['value'];
-      hospitalList.add({
-        'place' : value,
-        'distance':distanceValue
-      });
+      int distanceValue = responseData['rows'][0]['elements'][0]['distance']
+          ['value']; // TODO: 到達不能の時どうするか
+      hospitalList.add({'place': value, 'distance': distanceValue});
     });
     //ソート
     hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
