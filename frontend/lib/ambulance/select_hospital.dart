@@ -44,6 +44,7 @@ class _SelectHospitalState extends State<SelectHospital> {
                     name: 'name',
                     address: 'address',
                     number: value['distance'].toString(),
+                    distance: value['distance'],
                   )
               ],
             );
@@ -99,24 +100,28 @@ class _SelectHospitalState extends State<SelectHospital> {
     List<Map<String, dynamic>> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
     await Future.forEach(snapshot.docs, (value) async {
-      double originLat = value['place'].latitude;
-      double originLng = value['place'].longitude;
-      double destLat = origin[0];
-      double destLng = origin[1];
-      String mode = 'driving';
+      if (!value.data().containsKey('place')) {
+        hospitalList.add({'place': value, 'distance': 0});
+      } else {
+        double originLat = value['place'].latitude;
+        double originLng = value['place'].longitude;
+        double destLat = origin[0];
+        double destLng = origin[1];
+        String mode = 'driving';
 
-      String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
-          'origins=$originLat,$originLng'
-          '&destinations=$destLat,$destLng'
-          '&mode=$mode'
-          '&key=$apiKey';
-      final response = await http.get(Uri.parse(url));
-      final responseBody = response.body;
-      // リンクから距離を取得してソートする
-      Map<String, dynamic> responseData = json.decode(responseBody);
-      int distanceValue = responseData['rows'][0]['elements'][0]['distance']
-          ['value']; // TODO: 到達不能の時どうするか
-      hospitalList.add({'place': value, 'distance': distanceValue});
+        String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
+            'origins=$originLat,$originLng'
+            '&destinations=$destLat,$destLng'
+            '&mode=$mode'
+            '&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        final responseBody = response.body;
+        // リンクから距離を取得してソートする
+        Map<String, dynamic> responseData = json.decode(responseBody);
+        int distanceValue = responseData['rows'][0]['elements'][0]['distance']
+            ['value']; // TODO: 到達不能の時どうするか
+        hospitalList.add({'place': value, 'distance': distanceValue});
+      }
     });
     //ソート
     hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
@@ -131,12 +136,14 @@ class HospitalCard extends StatelessWidget {
     required this.address,
     required this.number,
     required this.id,
+    required this.distance,
   });
 
   final String name;
   final String address;
   final String number;
   final String id;
+  final int distance;
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +175,8 @@ class HospitalCard extends StatelessWidget {
                     text: address),
                 TextWithIcon(
                     textStyle: normalStyle, iconData: Icons.call, text: number),
+                TextWithIcon(
+                    iconData: Icons.directions, text: distance.toString()),
               ],
             ),
           ),
