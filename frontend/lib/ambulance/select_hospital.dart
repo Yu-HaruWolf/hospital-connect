@@ -7,6 +7,7 @@ import 'hospital.dart';
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert'; 
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -79,14 +80,12 @@ class _SelectHospitalState extends State<SelectHospital> {
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
-  List<Hospital> getSortedHospitalList(places, origin) {
-    const destinations = [];
-    const hospitalList = []; //[[病院ドキュメント0,距離],[病院ドキュメント1,距離],]
-    String apiKey =
-        'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA'; // ここにあなたのAPIキーを入力してください
-    places.forEach((value) {
-      double originLat = places.place.latitude;
-      double originLng = places.place.longitude;
+  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async{
+    List<Map<String,dynamic>> hospitalList = [];
+    String apiKey ='AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA'; 
+    hospitalDocList.forEach((value) async{
+      double originLat = value.place.latitude;
+      double originLng = value.place.longitude;
       double destLat = origin[0];
       double destLng = origin[1];
       String mode = 'driving';
@@ -96,10 +95,19 @@ class _SelectHospitalState extends State<SelectHospital> {
           '&destinations=$destLat,$destLng'
           '&mode=$mode'
           '&key=$apiKey';
-      final response = http.get(Uri.parse(url));
+       final response = await http.get(Uri.parse(url));
+       final responseBody = response.body;
       // TODO : リンクから距離を取得してソートする
+      Map<String, dynamic> responseData = json.decode(responseBody);
+      int distanceValue = responseData['row'][0]['elements'][0]['distance']['value'];
+      hospitalList.add({
+        'place' : value,
+        'distance':distanceValue
+      });
     });
-    return [];
+    //ソート
+    hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
+    return hospitalList;
   }
 }
 
