@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:frontend/custom_widgets/text_with_icon.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
-    print(appState.selectedHospitalId);
+    //print(appState.selectedHospitalId);
     return MaterialApp(
       title: 'TCU Rescue',
       theme: ThemeData(
@@ -70,6 +71,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  int _selectedIndex = 0;
+  void onTapped(int index) {
+  setState(() {
+    _selectedIndex = index;
+  });
+
+  var appState = context.read<ApplicationState>(); // context.watch() を context.read() に変更
+
+  // _selectedIndex の値に応じて screenId を変更
+  if (_selectedIndex == 0) {
+    appState.screenId = 0;
+  } else if (_selectedIndex == 1) {
+    appState.screenId = 4;
+  }
+
+  print(appState.screenId); // デバッグ用に screenId を出力
+}
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -102,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
       default:
         insideWidget = const Text('正しいscreenIdを設定してください！');
     }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -147,6 +167,25 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ]),
       ),
+
+      bottomNavigationBar: appState.screenId == 3
+          ? BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.reply_outlined), label: '戻る'),
+                BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'チャット'),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Colors.black,
+              selectedFontSize: 20,
+              unselectedFontSize: 20,
+              selectedIconTheme: const IconThemeData(color: Colors.white),
+              unselectedIconTheme: const IconThemeData(color: Colors.white),
+              selectedLabelStyle: const TextStyle(color: Colors.black),
+              unselectedLabelStyle: const TextStyle(color: Colors.black),
+              backgroundColor: Colors.red,
+              onTap: onTapped,
+            )
+          : null,
     );
   }
 }

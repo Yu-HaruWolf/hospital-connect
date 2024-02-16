@@ -1,7 +1,9 @@
 import 'dart:async';
+//import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +48,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
   int hospitalStatus = 0;
   List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
 
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -61,9 +64,9 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     );
 
     ButtonStyle requeststyle = ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      backgroundColor: const MaterialStatePropertyAll(Colors.white),
+      foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      side:const  MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
       shape: MaterialStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
@@ -72,9 +75,9 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     );
 
     ButtonStyle chatstyle = ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      backgroundColor: const MaterialStatePropertyAll(Colors.white),
+      foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      side: const MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
       shape: MaterialStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
@@ -84,15 +87,17 @@ class _HospitalDetailsState extends State<HospitalDetails> {
 
 /*    text_style    */
     TextStyle nameStyle = const TextStyle(
-      fontSize: 20,
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
     );
 
     TextStyle normalStyle = const TextStyle(
       fontSize: 20,
     );
 
-    TextStyle status_style = const TextStyle(
-      fontSize: 20,
+    TextStyle status_style = TextStyle(
+      fontSize: 25,
+      color: hospitalStatus == 0 ? Colors.red : Colors.green,
     );
 
     return Column(
@@ -107,7 +112,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    const CircularProgressIndicator(),
                   ],
                 );
               }
@@ -138,13 +143,15 @@ class _HospitalDetailsState extends State<HospitalDetails> {
               }
               Set<Marker> markers = {};
               markers.add(marker);
+
 /*          hospital_info      */
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
+                      initialCameraPosition: const CameraPosition(
                         target: LatLng(45, -122),
                         zoom: 11.0,
                       ),
@@ -153,28 +160,57 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                       markers: markers,
                     ),
                   ),
+                  /*
                   TextWithIcon(
                       textStyle: nameStyle,
                       iconData: Icons.local_hospital_sharp,
-                      text: name),
+                      text: name),*/
+                  Text(name,style: nameStyle,),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child:
                   TextWithIcon(
                       textStyle: normalStyle,
                       iconData: Icons.domain,
                       text: address),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child:
                   TextWithIcon(
                       textStyle: normalStyle,
                       iconData: Icons.call,
                       text: number),
+                  ),
                 ],
               );
             }),
-        TextWithIcon(
-          textStyle: status_style,
-          iconData: Icons.send,
-          text: ('Status: ${statusMessage[hospitalStatus]}'),
+        Row(
+          children: [
+            Padding(
+              padding:EdgeInsets.only(top: 10),
+              child:
+              TextWithIcon(
+                textStyle: status_style,
+                iconData: Icons.send,
+                text: ('${statusMessage[hospitalStatus]}'),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 10,left: 20),
+              child:
+            ElevatedButton(
+              onPressed: () {
+                changeStatus(hospitalStatus == 0 ? 1 : 0);
+              },
+              child: Text(hospitalStatus == 0 ?'Request' :'cancel'),
+              style: requeststyle,
+            ),
+            ),
+          ],
         ),
-
 /*          ボタン配置          */
+/*
         ElevatedButton(
           onPressed: () {
             appState.screenId = 1;
@@ -182,13 +218,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
           child: const Text('Back'),
           style: backstyle,
         ),
-        ElevatedButton(
-          onPressed: () {
-            changeStatus(hospitalStatus == 0 ? 1 : 0);
-          },
-          child: Text('Change Status'),
-          style: requeststyle,
-        ),
+        
         ElevatedButton(
           onPressed: () {
             appState.screenId = 4;
@@ -197,8 +227,10 @@ class _HospitalDetailsState extends State<HospitalDetails> {
           child: Text('chat'),
           style: chatstyle,
         ),
-      ],
-    );
+        */
+    ],
+  );
+
   }
 
   void changeStatus(int statusNum) {
