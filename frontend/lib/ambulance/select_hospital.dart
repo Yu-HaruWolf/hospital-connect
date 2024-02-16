@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import 'hospital.dart';
@@ -31,10 +30,10 @@ class _SelectHospitalState extends State<SelectHospital> {
           future: getSortedHospitalList([35.73550690100909, 139.8005679376201]),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text('Error!');
+              return const Text('Error!');
             }
             if (!snapshot.hasData) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             }
             return Column(
               // TODO : 表示したい内容を変更（距離とか）
