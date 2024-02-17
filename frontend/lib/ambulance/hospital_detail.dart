@@ -146,7 +146,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
 
 /*          hospital_info      */
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.4,
