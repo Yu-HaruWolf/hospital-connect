@@ -112,25 +112,34 @@ class _SelectHospitalState extends State<SelectHospital> {
         double destLat = origin[0];
         double destLng = origin[1];
         String mode = 'driving';
-      String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
-          'origins=$originLat,$originLng'
-          '&destinations=$destLat,$destLng'
-          '&mode=$mode'
-          '&key=$apiKey';
-      final response = await http.get(Uri.parse(url));
-      final responseBody = response.body;
-      // リンクから距離を取得してソートする
-      Map<String, dynamic> responseData = json.decode(responseBody);
-      if(responseData['status'] == "ZERO_RESULTS"){
-        distanceValue = 999999;
-      }else{
-        distanceValue = responseData['rows'][0]['elements'][0]['distance']['value'];
-        durationValue = responseData['rows'][0]['elements'][0]['duration']['value'];
-        distanceText = responseData['rows'][0]['elements'][0]['distance']['text'];
-        durationText = responseData['rows'][0]['elements'][0]['duration']['Text'];
-        hospitalList.add({'place': value, 'distance': distanceValue, 
-                          'duration': durationValue, 'distanceText':distanceText,'durationText':durationText
-                        });
+        String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
+            'origins=$originLat,$originLng'
+            '&destinations=$destLat,$destLng'
+            '&mode=$mode'
+            '&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        final responseBody = response.body;
+        // リンクから距離を取得してソートする
+        Map<String, dynamic> responseData = json.decode(responseBody);
+        if (responseData['status'] == "ZERO_RESULTS") {
+          distanceValue = 999999;
+        } else {
+          distanceValue =
+              responseData['rows'][0]['elements'][0]['distance']['value'];
+          durationValue =
+              responseData['rows'][0]['elements'][0]['duration']['value'];
+          distanceText =
+              responseData['rows'][0]['elements'][0]['distance']['text'];
+          durationText =
+              responseData['rows'][0]['elements'][0]['duration']['Text'];
+          hospitalList.add({
+            'place': value,
+            'distance': distanceValue,
+            'duration': durationValue,
+            'distanceText': distanceText,
+            'durationText': durationText
+          });
+        }
       }
     });
     //ソート
