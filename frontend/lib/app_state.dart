@@ -14,6 +14,9 @@ class ApplicationState extends ChangeNotifier {
     firebaseInit();
   }
 
+  // 位置情報関係
+  bool _isReadyGPS = false;
+  bool get isReadyGPS => _isReadyGPS;
   StreamSubscription<Position>? positionStream;
   Position? currentPosition;
 
@@ -44,16 +47,7 @@ class ApplicationState extends ChangeNotifier {
           userType = -1;
         } else if (doc.data()!['type'] == 'ambulance') {
           userType = 1;
-          // 位置情報取得権限確認
-          LocationPermission permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied) {
-            Geolocator.requestPermission();
-          } else {
-            positionStream =
-                Geolocator.getPositionStream().listen((Position? position) {
-              currentPosition = position;
-            });
-          }
+          gpsInit();
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
         }
@@ -74,6 +68,23 @@ class ApplicationState extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void gpsInit() async {
+    // 位置情報取得権限確認
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+      permission = await Geolocator.checkPermission();
+    }
+    if (permission != LocationPermission.denied) {
+      positionStream =
+          Geolocator.getPositionStream().listen((Position? position) {
+        _isReadyGPS = true;
+        currentPosition = position;
+        notifyListeners();
+      });
+    }
   }
 
   // 表示画面選択

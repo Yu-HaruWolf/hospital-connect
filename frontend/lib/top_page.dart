@@ -52,6 +52,7 @@ class TopPage extends StatelessWidget {
                         child: const Text('リクエスト一覧'))),
               ),
               signOutButton,
+              Text('GPS: ${appState.isReadyGPS ? 'Ready.' : 'Not Ready.'}'),
             ],
           );
         case 2:

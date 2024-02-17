@@ -21,7 +21,19 @@ class _SelectHospitalState extends State<SelectHospital> {
 
   @override
   Widget build(BuildContext context) {
-    Position? position = context.read<ApplicationState>().currentPosition;
+    Position position = context.read<ApplicationState>().currentPosition != null
+        ? context.read<ApplicationState>().currentPosition!
+        : Position(
+            longitude: 0.0,
+            latitude: 0.0,
+            timestamp: DateTime.fromMillisecondsSinceEpoch(0),
+            accuracy: 0.0,
+            altitude: 0.0,
+            altitudeAccuracy: 0.0,
+            heading: 0.0,
+            headingAccuracy: 0.0,
+            speed: 0.0,
+            speedAccuracy: 0.0);
     print(position);
     return PopScope(
       canPop: false,
@@ -31,7 +43,7 @@ class _SelectHospitalState extends State<SelectHospital> {
       child: SingleChildScrollView(
         child: FutureBuilder(
           future: getSortedHospitalList(
-              position!, context.read<ApplicationState>().selectedDepartments),
+              position, context.read<ApplicationState>().selectedDepartments),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return const Text('Error!');
@@ -75,7 +87,8 @@ class _SelectHospitalState extends State<SelectHospital> {
     List<Hospital> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
     await Future.forEach(snapshot.docs, (value) async {
-      if (!value.data().containsKey('place')) {
+      if (!value.data().containsKey('place') ||
+          origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
         hospitalList.add(Hospital(
             id: value.id,
             name: value.data()['name'],
