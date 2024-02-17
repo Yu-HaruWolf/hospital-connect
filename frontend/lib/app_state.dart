@@ -11,8 +11,11 @@ import 'firebase_options.dart';
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
-    init();
+    firebaseInit();
   }
+
+  StreamSubscription<Position>? positionStream;
+  Position? currentPosition;
 
   // Firebase Auth関係
   bool _loggedIn = false;
@@ -24,11 +27,12 @@ class ApplicationState extends ChangeNotifier {
   List<Department> get departments => _departments;
   int userType = -1; // -1:未認証/未登録 1:救急隊 2:病院
 
-  Future<void> init() async {
+  Future<void> firebaseInit() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
     FirebaseAuth.instance.userChanges().listen((user) async {
+      positionStream?.cancel();
       if (user != null) {
         _loggedIn = true;
         DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore
@@ -44,6 +48,11 @@ class ApplicationState extends ChangeNotifier {
           LocationPermission permission = await Geolocator.checkPermission();
           if (permission == LocationPermission.denied) {
             Geolocator.requestPermission();
+          } else {
+            positionStream =
+                Geolocator.getPositionStream().listen((Position? position) {
+              currentPosition = position;
+            });
           }
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
