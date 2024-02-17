@@ -41,10 +41,13 @@ class _SelectHospitalState extends State<SelectHospital> {
               children: [
                 for (dynamic value in snapshot.data!)
                   HospitalCard(
-                    id: '0',
-                    name: 'name',
-                    address: 'address',
-                    number: value['distance'].toString(),
+                    id: value.id,
+                    name: value.data,
+                    address: value.address,
+                    number: value.number,
+                    distance: value['distanceText'],
+                    duration: value['durationText'],
+                    
                   )
               ],
             );
@@ -90,11 +93,14 @@ class _SelectHospitalState extends State<SelectHospital> {
   // 関数定義
   /*
   関数概要：病院を近い順にソート
-  places 病院のドキュメントのリスト
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
   Future<List<dynamic>> getSortedHospitalList(origin) async {
+    int distanceValue; //現在地から病院までの距離
+    int durationValue;
+    String distanceText;
+    String durationText;
     var snapshot =
         await FirebaseFirestore.instance.collection('hospital').get();
     List<Map<String, dynamic>> hospitalList = [];
@@ -115,9 +121,17 @@ class _SelectHospitalState extends State<SelectHospital> {
       final responseBody = response.body;
       // リンクから距離を取得してソートする
       Map<String, dynamic> responseData = json.decode(responseBody);
-      int distanceValue = responseData['rows'][0]['elements'][0]['distance']
-          ['value']; // TODO: 到達不能の時どうするか
-      hospitalList.add({'place': value, 'distance': distanceValue});
+      if(responseData['status'] == "ZERO_RESULTS"){
+        distanceValue = 999999;
+      }else{
+        distanceValue = responseData['rows'][0]['elements'][0]['distance']['value'];
+        durationValue = responseData['rows'][0]['elements'][0]['duration']['value'];
+        distanceText = responseData['rows'][0]['elements'][0]['distance']['text'];
+        durationText = responseData['rows'][0]['elements'][0]['duration']['Text'];
+        hospitalList.add({'place': value, 'distance': distanceValue, 
+                          'duration': durationValue, 'distanceText':distanceText,'durationText':durationText
+                        });
+      }
     });
     //ソート
     hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
@@ -132,12 +146,16 @@ class HospitalCard extends StatelessWidget {
     required this.address,
     required this.number,
     required this.id,
+    required this.distance,
+    required this.duration,
   });
 
   final String name;
   final String address;
   final String number;
   final String id;
+  final String distance;
+  final String duration;
 
   @override
   Widget build(BuildContext context) {
