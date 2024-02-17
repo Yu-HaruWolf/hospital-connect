@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +18,9 @@ class HospitalDetails extends StatefulWidget {
 class _HospitalDetailsState extends State<HospitalDetails> {
   Position? currentPosition;
   late StreamSubscription<Position> positionStream;
+
+  int hospitalStatus = 0;
+  List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
 
   final LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.high,
@@ -45,9 +47,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     });
   }
 
-  int hospitalStatus = 0;
-  List<String> statusMessage = ['リクエスト未作成', 'リクエスト作成済み'];
-
+  //関数作成
+  void createRequest(String hospitalId) {}
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +57,13 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         .collection('hospital')
         .doc(appState.selectedHospitalId)
         .get();
-/*    button_style    */
-    ButtonStyle backstyle = const ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
-    );
 
+    /*    button_style    */
     ButtonStyle requeststyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll(Colors.white),
       foregroundColor: const MaterialStatePropertyAll(Colors.black),
-      side:const  MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      side: const MaterialStatePropertyAll(
+          BorderSide(color: Colors.black, width: 2)),
       shape: MaterialStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
@@ -74,18 +71,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       ),
     );
 
-    ButtonStyle chatstyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll(Colors.white),
-      foregroundColor: const MaterialStatePropertyAll(Colors.black),
-      side: const MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
-      shape: MaterialStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
-      ),
-    );
-
-/*    text_style    */
+    /*    Text Style    */
     TextStyle nameStyle = const TextStyle(
       fontSize: 30,
       fontWeight: FontWeight.bold,
@@ -95,143 +81,115 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       fontSize: 20,
     );
 
-    TextStyle status_style = TextStyle(
+    TextStyle statusStyle = TextStyle(
       fontSize: 25,
       color: hospitalStatus == 0 ? Colors.red : Colors.green,
     );
 
-    return Column(
-      children: [
-        FutureBuilder(
-            future: docRef,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text('Error!');
-              }
-              if (!snapshot.hasData) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          appState.screenId = 2;
+        },
+        child: Column(children: [
+          FutureBuilder(
+              future: docRef,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Error!');
+                }
+                if (!snapshot.hasData) {
+                  return const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  );
+                }
+
+                final name = snapshot.data!.data()!.containsKey('name')
+                    ? snapshot.data!.data()!['name']
+                    : 'No Name';
+                final address = snapshot.data!.data()!.containsKey('address')
+                    ? snapshot.data!.data()!['address']
+                    : 'No Address';
+                final number = snapshot.data!.data()!.containsKey('call')
+                    ? snapshot.data!.data()!['call']
+                    : 'No call';
+                final GeoPoint? geopoint =
+                    snapshot.data!.data()!.containsKey('place')
+                        ? snapshot.data!.data()!['place']
+                        : null;
+                late Marker marker;
+                late LatLng latLng;
+                Set<Marker> markers = {};
+                if (geopoint != null) {
+                  latLng = LatLng(geopoint.latitude, geopoint.longitude);
+                  marker = Marker(
+                    markerId: const MarkerId('0'),
+                    position: latLng,
+                  );
+                  markers.add(marker);
+                }
+                /*          hospital_info      */
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    if (geopoint != null)
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: latLng,
+                            zoom: 15.0,
+                          ),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          markers: markers,
+                        ),
+                      ),
+                    Text(
+                      name,
+                      style: nameStyle,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: TextWithIcon(
+                          textStyle: normalStyle,
+                          iconData: Icons.domain,
+                          text: address),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: TextWithIcon(
+                          textStyle: normalStyle,
+                          iconData: Icons.call,
+                          text: number),
+                    )
                   ],
                 );
-              }
-
-              final name = snapshot.data!.data()!.containsKey('name')
-                  ? snapshot.data!.data()!['name']
-                  : 'No Name';
-              final address = snapshot.data!.data()!.containsKey('address')
-                  ? snapshot.data!.data()!['address']
-                  : 'No Address';
-              final number = snapshot.data!.data()!.containsKey('call')
-                  ? snapshot.data!.data()!['call']
-                  : 'No call';
-              final GeoPoint geopoint =
-                  snapshot.data!.data()!.containsKey('place')
-                      ? snapshot.data!.data()!['place']
-                      : null;
-              late Marker marker;
-              late LatLng latlng;
-              if (geopoint != null) {
-                marker = Marker(
-                  markerId: MarkerId('0'),
-                  position: LatLng(geopoint.latitude, geopoint.longitude),
-                );
-              } else {
-                marker =
-                    Marker(markerId: MarkerId('0'), position: LatLng(0, 0));
-              }
-              Set<Marker> markers = {};
-              markers.add(marker);
-
-/*          hospital_info      */
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    child: GoogleMap(
-                      initialCameraPosition: const CameraPosition(
-                        target: LatLng(45, -122),
-                        zoom: 11.0,
-                      ),
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
-                      markers: markers,
-                    ),
-                  ),
-                  /*
-                  TextWithIcon(
-                      textStyle: nameStyle,
-                      iconData: Icons.local_hospital_sharp,
-                      text: name),*/
-                  Text(name,style: nameStyle,),
-                  Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child:
-                  TextWithIcon(
-                      textStyle: normalStyle,
-                      iconData: Icons.domain,
-                      text: address),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child:
-                  TextWithIcon(
-                      textStyle: normalStyle,
-                      iconData: Icons.call,
-                      text: number),
-                  ),
-                ],
-              );
-            }),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+              }),
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Padding(
-              padding:EdgeInsets.only(top: 10),
-              child:
-              TextWithIcon(
-                textStyle: status_style,
+              padding: const EdgeInsets.only(top: 10),
+              child: TextWithIcon(
+                textStyle: statusStyle,
                 iconData: Icons.send,
-                text: ('${statusMessage[hospitalStatus]}'),
+                text: ('Status: ${statusMessage[hospitalStatus]}'),
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: 10,left: 20),
-              child:
-            ElevatedButton(
-              onPressed: () {
-                changeStatus(hospitalStatus == 0 ? 1 : 0);
-              },
-              child: Text(hospitalStatus == 0 ?'Request' :'cancel'),
-              style: requeststyle,
+              padding: const EdgeInsets.only(top: 10, left: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  changeStatus(hospitalStatus == 0 ? 1 : 0);
+                },
+                style: requeststyle,
+                child: Text(hospitalStatus == 0 ? 'Request' : 'cancel'),
+              ),
             ),
-            ),
-          ],
-        ),
-/*          ボタン配置          */
-/*
-        ElevatedButton(
-          onPressed: () {
-            appState.screenId = 1;
-          },
-          child: const Text('Back'),
-          style: backstyle,
-        ),
-        
-        ElevatedButton(
-          onPressed: () {
-            appState.screenId = 4;
-          },
-          //icon: const Icon(Icons.chat),
-          child: Text('chat'),
-          style: chatstyle,
-        ),
-        */
-    ],
-  );
-
+          ])
+        ]));
   }
 
   void changeStatus(int statusNum) {

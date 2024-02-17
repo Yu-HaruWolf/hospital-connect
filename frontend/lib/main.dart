@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:frontend/custom_widgets/text_with_icon.dart';
 import 'package:provider/provider.dart';
 
@@ -42,15 +42,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -58,44 +49,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  int _selectedIndex = 0;
   void onTapped(int index) {
-  setState(() {
-    _selectedIndex = index;
-  });
+    var appState = context
+        .read<ApplicationState>(); // context.watch() を context.read() に変更
 
-  var appState = context.read<ApplicationState>(); // context.watch() を context.read() に変更
-
-  // _selectedIndex の値に応じて screenId を変更
-  if (_selectedIndex == 0) {
-    appState.screenId = 0;
-  } else if (_selectedIndex == 1) {
-    appState.screenId = 4;
+    // _selectedIndex の値に応じて screenId を変更
+    if (index == 0) {
+      appState.screenId = 2;
+    } else if (index == 1) {
+      appState.screenId = 4;
+    }
   }
-
-  print(appState.screenId); // デバッグ用に screenId を出力
-}
 
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
+    String? userName;
+    if (appState.loggedIn) {
+      if (FirebaseAuth.instance.currentUser!.displayName == null ||
+          FirebaseAuth.instance.currentUser!.displayName == "") {
+        userName = FirebaseAuth.instance.currentUser!.email!.split(('@'))[0];
+      } else {
+        userName = FirebaseAuth.instance.currentUser!.displayName!;
+      }
+    }
     Widget insideWidget;
     switch (appState.screenId) {
       case 0:
-        insideWidget = TopPage();
+        insideWidget = const TopPage();
         break;
       case 1: /*  診療科選択  */
         insideWidget = const SelectDepartment();
@@ -107,13 +88,13 @@ class _MyHomePageState extends State<MyHomePage> {
         insideWidget = HospitalDetails();
         break;
       case 4: /*  チャット  */
-        insideWidget = ChatRoom();
+        insideWidget = const ChatRoom();
         break;
       case 5: /*  診療科ごとの人数変更  */
-        insideWidget = SettingPage();
+        insideWidget = const SettingPage();
         break;
       case 6: /*  リクエスト一覧  */
-        insideWidget = RequestListPage();
+        insideWidget = const RequestListPage();
         break;
       case 7: /*  リクエスト詳細画面  */
         insideWidget = RequestDetail();
@@ -133,48 +114,63 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(children: [
           DrawerHeader(
-              child: Text('Drawer Header'),
-              decoration: BoxDecoration(
-                color: Colors.red,
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+              ),
+              child: Column(
+                children: [
+                  appState.loggedIn
+                      ? Text('Hello, ${userName!}!')
+                      : const Text('Please sign in.'),
+                  if (appState.userType == -1)
+                    const Text('You are unauthorized.'),
+                  if (appState.userType == 1)
+                    const Text('You are rescue team.'),
+                  if (appState.userType == 2)
+                    const Text('You are hospital staff.'),
+                ],
               )),
           ListTile(
-            title: TextWithIcon(iconData: Icons.home, text: 'Home'),
-            onTap: () {
-              appState.screenId = 0;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.search, text: 'Search'),
-            onTap: () {
-              appState.screenId = 1;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.settings, text: 'Settings'),
-            onTap: () {
-              appState.screenId = 5;
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: TextWithIcon(iconData: Icons.fact_check, text: 'Requests'),
-            onTap: () {
-              appState.screenId = 6;
-              Navigator.pop(context);
-            },
-          ),
+              title: const TextWithIcon(iconData: Icons.home, text: 'Home'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 0;
+              }),
+          if (appState.userType == 1)
+            ListTile(
+              title: const TextWithIcon(iconData: Icons.search, text: 'Search'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 1;
+              },
+            ),
+          if (appState.userType == 2)
+            ListTile(
+              title: const TextWithIcon(
+                  iconData: Icons.settings, text: 'Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 5;
+              },
+            ),
+          if (appState.userType != -1)
+            ListTile(
+              title: const TextWithIcon(
+                  iconData: Icons.fact_check, text: 'Requests'),
+              onTap: () {
+                Navigator.pop(context);
+                appState.screenId = 6;
+              },
+            ),
         ]),
       ),
-
       bottomNavigationBar: appState.screenId == 3
           ? BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.reply_outlined), label: '戻る'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.reply_outlined), label: '戻る'),
                 BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'チャット'),
               ],
-              currentIndex: _selectedIndex,
               selectedItemColor: Colors.black,
               selectedFontSize: 20,
               unselectedFontSize: 20,

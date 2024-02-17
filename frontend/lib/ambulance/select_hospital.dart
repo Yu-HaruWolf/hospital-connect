@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'hospital.dart';
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -17,44 +19,92 @@ class _SelectHospitalState extends State<SelectHospital> {
   List<Hospital> hospitals = [];
 
   @override
-  initState() {
-    super.initState();
-    loadHospitals();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (Hospital hospital in hospitals)
-            HospitalCard(
-              name: hospital.name,
-              address: hospital.address,
-              number: hospital.number,
-              id: hospital.id,
-            ),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        context.read<ApplicationState>().screenId = 1;
+      },
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+          future: loadHospitals(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Text('Error!');
+            }
+            if (!snapshot.hasData) {
+              return const CircularProgressIndicator();
+            }
+            return Column(
+              children: [
+                for (Hospital hospital in hospitals)
+                  HospitalCard(
+                    name: hospital.name,
+                    address: hospital.address,
+                    number: hospital.number,
+                    id: hospital.id,
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Future<void> loadHospitals() async {
+  Future<bool> loadHospitals() async {
     List<Hospital> result = [];
     var value = await FirebaseFirestore.instance.collection('hospital').get();
-
     for (var docSnapshot in value.docs) {
       Map<String, dynamic> map = docSnapshot.data();
       result.add(Hospital(
-          id: docSnapshot.id,
-          name: map.containsKey('name') ? map['name'] : 'No Name',
-          address: map.containsKey('address') ? map['address'] : 'No Address',
-          number: map.containsKey('call') ? map['call'] : 'No Number'));
+        id: docSnapshot.id,
+        name: map.containsKey('name') ? map['name'] : 'No Name',
+        address: map.containsKey('address') ? map['address'] : 'No Address',
+        number: map.containsKey('call') ? map['call'] : 'No Number',
+        distance: 0.0,
+      ));
     }
 
     setState(() {
       hospitals = result;
     });
+    return true;
+  }
+
+  // 関数定義
+  /*
+  関数概要：病院を近い順にソート
+  places 病院のドキュメントのリスト
+  origin 現在地[緯度,経度]
+  戻り値：ソートされた病院ドキュメントリスト
+  */
+  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async {
+    List<Map<String, dynamic>> hospitalList = [];
+    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
+    hospitalDocList.forEach((value) async {
+      double originLat = value.place.latitude;
+      double originLng = value.place.longitude;
+      double destLat = origin[0];
+      double destLng = origin[1];
+      String mode = 'driving';
+
+      String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
+          'origins=$originLat,$originLng'
+          '&destinations=$destLat,$destLng'
+          '&mode=$mode'
+          '&key=$apiKey';
+      final response = await http.get(Uri.parse(url));
+      final responseBody = response.body;
+      // TODO : リンクから距離を取得してソートする
+      Map<String, dynamic> responseData = json.decode(responseBody);
+      int distanceValue =
+          responseData['row'][0]['elements'][0]['distance']['value'];
+      hospitalList.add({'place': value, 'distance': distanceValue});
+    });
+    //ソート
+    hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
+    return hospitalList;
   }
 }
 
@@ -84,19 +134,6 @@ class HospitalCard extends StatelessWidget {
         onTap: () {
           appState.selectedHospitalId = id;
           appState.screenId = 3;
-          // Firebaseにアクセスするのはこんな感じ？
-          /*
-          FirebaseFirestore.instance.collection('hospital').get().then(
-            (value) {
-              print("Successfully completed");
-              for (var docSnapshot in value.docs) {
-                print('${docSnapshot.id} => ${docSnapshot.data()}');
-              }
-            },
-            onError: (e) => print("Error getting document: $e"),
-          );
-          */
-          //
         },
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
