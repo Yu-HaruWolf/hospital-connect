@@ -186,6 +186,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
               );
             }),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding:EdgeInsets.only(top: 10),
