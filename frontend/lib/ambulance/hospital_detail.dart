@@ -1,4 +1,5 @@
 import 'dart:async';
+//import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -56,17 +57,13 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         .collection('hospital')
         .doc(appState.selectedHospitalId)
         .get();
-/*    button_style    */
-    ButtonStyle backstyle = const ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
-    );
 
+    /*    button_style    */
     ButtonStyle requeststyle = ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
+      backgroundColor: const MaterialStatePropertyAll(Colors.white),
+      foregroundColor: const MaterialStatePropertyAll(Colors.black),
+      side: const MaterialStatePropertyAll(
+          BorderSide(color: Colors.black, width: 2)),
       shape: MaterialStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
@@ -74,37 +71,27 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       ),
     );
 
-    ButtonStyle chatstyle = ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.white),
-      foregroundColor: MaterialStatePropertyAll(Colors.black),
-      side: MaterialStatePropertyAll(BorderSide(color: Colors.black, width: 2)),
-      shape: MaterialStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
-      ),
-    );
-
-/*    text_style    */
+    /*    Text Style    */
     TextStyle nameStyle = const TextStyle(
-      fontSize: 20,
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
     );
 
     TextStyle normalStyle = const TextStyle(
       fontSize: 20,
     );
 
-    TextStyle status_style = const TextStyle(
-      fontSize: 20,
+    TextStyle statusStyle = TextStyle(
+      fontSize: 25,
+      color: hospitalStatus == 0 ? Colors.red : Colors.green,
     );
 
     return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        appState.screenId = 2;
-      },
-      child: Column(
-        children: [
+        canPop: false,
+        onPopInvoked: (didPop) {
+          appState.screenId = 2;
+        },
+        child: Column(children: [
           FutureBuilder(
               future: docRef,
               builder: (context, snapshot) {
@@ -112,7 +99,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                   return const Text('Error!');
                 }
                 if (!snapshot.hasData) {
-                  return Row(
+                  return const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(),
@@ -129,88 +116,81 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                 final number = snapshot.data!.data()!.containsKey('call')
                     ? snapshot.data!.data()!['call']
                     : 'No call';
-                final GeoPoint geopoint =
+                final GeoPoint? geopoint =
                     snapshot.data!.data()!.containsKey('place')
                         ? snapshot.data!.data()!['place']
                         : null;
                 late Marker marker;
                 late LatLng latLng;
+                Set<Marker> markers = {};
                 if (geopoint != null) {
                   latLng = LatLng(geopoint.latitude, geopoint.longitude);
                   marker = Marker(
-                    markerId: MarkerId('0'),
+                    markerId: const MarkerId('0'),
                     position: latLng,
                   );
-                } else {
-                  latLng = LatLng(0, 0);
-                  marker = Marker(markerId: MarkerId('0'), position: latLng);
+                  markers.add(marker);
                 }
-                Set<Marker> markers = {};
-                markers.add(marker);
                 /*          hospital_info      */
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: latLng,
-                          zoom: 15.0,
+                    if (geopoint != null)
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: latLng,
+                            zoom: 15.0,
+                          ),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                          markers: markers,
                         ),
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                        markers: markers,
                       ),
+                    Text(
+                      name,
+                      style: nameStyle,
                     ),
-                    TextWithIcon(
-                        textStyle: nameStyle,
-                        iconData: Icons.local_hospital_sharp,
-                        text: name),
-                    TextWithIcon(
-                        textStyle: normalStyle,
-                        iconData: Icons.domain,
-                        text: address),
-                    TextWithIcon(
-                        textStyle: normalStyle,
-                        iconData: Icons.call,
-                        text: number),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: TextWithIcon(
+                          textStyle: normalStyle,
+                          iconData: Icons.domain,
+                          text: address),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: TextWithIcon(
+                          textStyle: normalStyle,
+                          iconData: Icons.call,
+                          text: number),
+                    )
                   ],
                 );
               }),
-          TextWithIcon(
-            textStyle: status_style,
-            iconData: Icons.send,
-            text: ('Status: ${statusMessage[hospitalStatus]}'),
-          ),
-
-          /*          ボタン配置          */
-          ElevatedButton(
-            onPressed: () {
-              appState.screenId = 2;
-            },
-            child: const Text('Back'),
-            style: backstyle,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              changeStatus(hospitalStatus == 0 ? 1 : 0);
-              createRequest(appState
-                  .selectedHospitalId); // 診療科、病院のドキュメントID,救急車のID、progress
-            },
-            child: Text('Change Status'),
-            style: requeststyle,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              appState.screenId = 4;
-            },
-            //icon: const Icon(Icons.chat),
-            child: Text('chat'),
-            style: chatstyle,
-          ),
-        ],
-      ),
-    );
+          Row(children: [
+            // TODO: レイアウト確認 画面をオーバーすることあり
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: TextWithIcon(
+                textStyle: statusStyle,
+                iconData: Icons.send,
+                text: ('Status: ${statusMessage[hospitalStatus]}'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10, left: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  changeStatus(hospitalStatus == 0 ? 1 : 0);
+                },
+                style: requeststyle,
+                child: Text(hospitalStatus == 0 ? 'Request' : 'cancel'),
+              ),
+            ),
+          ])
+        ]));
   }
 
   void changeStatus(int statusNum) {

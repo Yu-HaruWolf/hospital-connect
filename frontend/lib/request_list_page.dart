@@ -5,6 +5,8 @@ import 'app_state.dart';
 import 'custom_widgets/text_with_icon.dart';
 
 class RequestListPage extends StatelessWidget {
+  const RequestListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -16,7 +18,7 @@ class RequestListPage extends StatelessWidget {
         child: Column(
           children: [
             for (int i = 0; i < 5; i++)
-              HospitalCard(
+              const HospitalCard(
                   title: 'Title',
                   department: 'Department',
                   lastUpdateTime: '2000/1/1 12:34:56',

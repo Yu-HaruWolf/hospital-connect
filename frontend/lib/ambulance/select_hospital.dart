@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import 'hospital.dart';
@@ -31,10 +30,10 @@ class _SelectHospitalState extends State<SelectHospital> {
           future: getSortedHospitalList([35.73550690100909, 139.8005679376201]),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text('Error!');
+              return const Text('Error!');
             }
             if (!snapshot.hasData) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             }
             return Column(
               // TODO : 表示したい内容を変更（距離とか）
@@ -47,7 +46,6 @@ class _SelectHospitalState extends State<SelectHospital> {
                     number: value.number,
                     distance: value['distanceText'],
                     duration: value['durationText'],
-                    
                   )
               ],
             );
@@ -106,12 +104,14 @@ class _SelectHospitalState extends State<SelectHospital> {
     List<Map<String, dynamic>> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
     await Future.forEach(snapshot.docs, (value) async {
-      double originLat = value['place'].latitude;
-      double originLng = value['place'].longitude;
-      double destLat = origin[0];
-      double destLng = origin[1];
-      String mode = 'driving';
-
+      if (!value.data().containsKey('place')) {
+        hospitalList.add({'place': value, 'distance': 0});
+      } else {
+        double originLat = value['place'].latitude;
+        double originLng = value['place'].longitude;
+        double destLat = origin[0];
+        double destLng = origin[1];
+        String mode = 'driving';
       String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
           'origins=$originLat,$originLng'
           '&destinations=$destLat,$destLng'
@@ -156,7 +156,6 @@ class HospitalCard extends StatelessWidget {
   final String id;
   final String distance;
   final String duration;
-
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -187,6 +186,8 @@ class HospitalCard extends StatelessWidget {
                     text: address),
                 TextWithIcon(
                     textStyle: normalStyle, iconData: Icons.call, text: number),
+                TextWithIcon(
+                    iconData: Icons.directions, text: distance.toString()),
               ],
             ),
           ),

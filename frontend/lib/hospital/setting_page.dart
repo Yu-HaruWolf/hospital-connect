@@ -4,6 +4,8 @@ import 'package:frontend/app_state.dart';
 import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {
+  const SettingPage({super.key});
+
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
@@ -27,14 +29,14 @@ class _SettingPageState extends State<SettingPage> {
             Row(
               children: [
                 DropdownButton(
-                  items: [
+                  items: const [
                     DropdownMenuItem(
-                      child: Text('value'),
                       value: 'B',
+                      child: Text('value'),
                     ),
                     DropdownMenuItem(
-                      child: Text('value2'),
                       value: 'A',
+                      child: Text('value2'),
                     ),
                   ],
                   value: isSelectedValue[i],
@@ -62,11 +64,11 @@ class _SettingPageState extends State<SettingPage> {
                       isSelectedValue.add('A');
                     });
                   },
-                  child: Text('Add')),
+                  child: const Text('Add')),
               ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.send),
-                  label: Text('Send')),
+                  icon: const Icon(Icons.send),
+                  label: const Text('Send')),
             ],
           ),
         ],
