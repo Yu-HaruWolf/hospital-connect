@@ -24,30 +24,39 @@ class _SettingPageState extends State<SettingPage> {
         context.read<ApplicationState>().screenId = 0;
       },
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           for (int i = 0; i < numOfDepartment; i++)
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                DropdownButton(
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'B',
-                      child: Text('value'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A',
-                      child: Text('value2'),
-                    ),
-                  ],
-                  value: isSelectedValue[i],
-                  onChanged: (value) {
-                    setState(() {
-                      isSelectedValue[i] = value!;
-                    });
-                  },
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: DropdownButton(
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'B',
+                        child: Text('value'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'A',
+                        child: Text('value2'),
+                      ),
+                    ],
+                    value: isSelectedValue[i],
+                    onChanged: (value) {
+                      setState(() {
+                        isSelectedValue[i] = value!;
+                      });
+                    },
+                  ),
                 ),
                 SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
+                  width: MediaQuery.of(context).size.width * 0.05,
+                ),
+                SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.1,
                     child: TextField(
                       onChanged: (value) => print(value),
                       keyboardType: TextInputType.number,
@@ -56,6 +65,7 @@ class _SettingPageState extends State<SettingPage> {
               ],
             ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
                   onPressed: () {
@@ -65,6 +75,9 @@ class _SettingPageState extends State<SettingPage> {
                     });
                   },
                   child: const Text('Add')),
+              SizedBox(
+                width: 10,
+              ),
               ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.send),
