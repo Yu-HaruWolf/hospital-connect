@@ -78,93 +78,42 @@ class _SettingPageState extends State<SettingPage> {
       onPopInvoked: (didPop) {
         context.read<ApplicationState>().screenId = 0;
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: Center(child: Text('Department')),
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.15,
-                child: Center(child: Text('Active')),
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.15,
-                child: Center(child: Text('Amount')),
-              ),
-            ],
-          ),
-          for (int i = 0; i < added.length; i++)
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
-                  child: Text(added[i].department.name),
+                  child: Center(child: Text('Department')),
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.1,
-                  child: Checkbox(
-                    value: added[i].isAccept,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        added[i].isAccept = value!;
-                      });
-                    },
-                  ),
+                  width: MediaQuery.of(context).size.width * 0.15,
+                  child: Center(child: Text('Active')),
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+                  width: MediaQuery.of(context).size.width * 0.15,
+                  child: Center(child: Text('Amount')),
                 ),
-                SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.1,
-                    child: TextFormField(
-                      initialValue: added[i].amount.toString(),
-                      onChanged: (value) {
-                        if (value == '') {
-                          added[i].amount = 0;
-                        } else {
-                          added[i].amount = int.parse(value);
-                        }
-                      },
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    )),
               ],
             ),
-          SizedBox(
-            height: 10,
-          ),
-          Column(
-            children: [
+            for (int i = 0; i < added.length; i++)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.7,
-                    child: DropdownButton(
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(
-                          enabled: false,
-                          value: -1,
-                          child: Text('Please Select'),
-                        ),
-                        for (int i = 0; i < notAdded.length; i++)
-                          DropdownMenuItem(
-                            enabled: true,
-                            value: i,
-                            child: Text(notAdded[i].department.name),
-                          ),
-                      ],
-                      value: selectedForAddDepartment,
-                      onChanged: (value) {
+                    child: Text(added[i].department.name),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.1,
+                    child: Checkbox(
+                      value: added[i].isAccept,
+                      onChanged: (bool? value) {
                         setState(() {
-                          selectedForAddDepartment = value as int;
+                          added[i].isAccept = value!;
                         });
                       },
                     ),
@@ -173,33 +122,88 @@ class _SettingPageState extends State<SettingPage> {
                     width: MediaQuery.of(context).size.width * 0.05,
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            if (selectedForAddDepartment == -1) return;
-                            added.add(notAdded[selectedForAddDepartment]);
-                            notAdded.removeAt(selectedForAddDepartment);
-                            selectedForAddDepartment = -1;
-                          });
+                      width: MediaQuery.of(context).size.width * 0.1,
+                      child: TextFormField(
+                        initialValue: added[i].amount.toString(),
+                        onChanged: (value) {
+                          if (value == '') {
+                            added[i].amount = 0;
+                          } else {
+                            added[i].amount = int.parse(value);
+                          }
                         },
-                        child: const Text('Add')),
-                  ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      )),
                 ],
               ),
-              ElevatedButton.icon(
-                  onPressed: () {
-                    for (int i = 0; i < added.length; i++) {
-                      updateFirebase(
-                          context.read<ApplicationState>().loggedInHospital,
-                          added[i]);
-                    }
-                  },
-                  icon: const Icon(Icons.send),
-                  label: const Text('Save')),
-            ],
-          ),
-        ],
+            SizedBox(
+              height: 10,
+            ),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: DropdownButton(
+                        isExpanded: true,
+                        items: [
+                          DropdownMenuItem(
+                            enabled: false,
+                            value: -1,
+                            child: Text('Please Select'),
+                          ),
+                          for (int i = 0; i < notAdded.length; i++)
+                            DropdownMenuItem(
+                              enabled: true,
+                              value: i,
+                              child: Text(notAdded[i].department.name),
+                            ),
+                        ],
+                        value: selectedForAddDepartment,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedForAddDepartment = value as int;
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.05,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              if (selectedForAddDepartment == -1) return;
+                              added.add(notAdded[selectedForAddDepartment]);
+                              notAdded.removeAt(selectedForAddDepartment);
+                              selectedForAddDepartment = -1;
+                            });
+                          },
+                          child: const Text('Add')),
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      for (int i = 0; i < added.length; i++) {
+                        updateFirebase(
+                            context.read<ApplicationState>().loggedInHospital,
+                            added[i]);
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                    label: const Text('Save')),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
