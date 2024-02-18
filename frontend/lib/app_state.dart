@@ -11,8 +11,14 @@ import 'firebase_options.dart';
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
-    init();
+    firebaseInit();
   }
+
+  // 位置情報関係
+  bool _isReadyGPS = false;
+  bool get isReadyGPS => _isReadyGPS;
+  StreamSubscription<Position>? positionStream;
+  Position? currentPosition;
 
   // Firebase Auth関係
   bool _loggedIn = false;
@@ -27,11 +33,12 @@ class ApplicationState extends ChangeNotifier {
   // 病院用関連付け
   String loggedInHospital = "";
 
-  Future<void> init() async {
+  Future<void> firebaseInit() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
     FirebaseAuth.instance.userChanges().listen((user) async {
+      positionStream?.cancel();
       if (user != null) {
         _loggedIn = true;
         DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore
@@ -43,11 +50,7 @@ class ApplicationState extends ChangeNotifier {
           userType = -1;
         } else if (doc.data()!['type'] == 'ambulance') {
           userType = 1;
-          // 位置情報取得権限確認
-          LocationPermission permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied) {
-            Geolocator.requestPermission();
-          }
+          gpsInit();
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
           loggedInHospital = doc.data()!['hospital'].id;
@@ -70,6 +73,23 @@ class ApplicationState extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void gpsInit() async {
+    // 位置情報取得権限確認
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+      permission = await Geolocator.checkPermission();
+    }
+    if (permission != LocationPermission.denied) {
+      positionStream =
+          Geolocator.getPositionStream().listen((Position? position) {
+        _isReadyGPS = true;
+        currentPosition = position;
+        notifyListeners();
+      });
+    }
   }
 
   // 表示画面選択

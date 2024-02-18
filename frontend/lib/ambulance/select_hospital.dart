@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import 'hospital.dart';
@@ -20,6 +21,19 @@ class _SelectHospitalState extends State<SelectHospital> {
 
   @override
   Widget build(BuildContext context) {
+    Position position = context.read<ApplicationState>().currentPosition != null
+        ? context.read<ApplicationState>().currentPosition!
+        : Position(
+            longitude: 0.0,
+            latitude: 0.0,
+            timestamp: DateTime.fromMillisecondsSinceEpoch(0),
+            accuracy: 0.0,
+            altitude: 0.0,
+            altitudeAccuracy: 0.0,
+            heading: 0.0,
+            headingAccuracy: 0.0,
+            speed: 0.0,
+            speedAccuracy: 0.0);
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -27,7 +41,8 @@ class _SelectHospitalState extends State<SelectHospital> {
       },
       child: SingleChildScrollView(
         child: FutureBuilder(
-          future: loadHospitals(),
+          future: getSortedHospitalList(
+              position, context.read<ApplicationState>().selectedDepartments),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return const Text('Error!');
@@ -37,13 +52,16 @@ class _SelectHospitalState extends State<SelectHospital> {
             }
             return Column(
               children: [
-                for (Hospital hospital in hospitals)
+                if (snapshot.data!.isEmpty) const Text('No Result'),
+                for (Hospital hospital in snapshot.data!)
                   HospitalCard(
+                    id: hospital.id,
                     name: hospital.name,
                     address: hospital.address,
                     number: hospital.number,
-                    id: hospital.id,
-                  ),
+                    distance: hospital.distance,
+                    duration: hospital.duration,
+                  )
               ],
             );
           },
@@ -52,58 +70,108 @@ class _SelectHospitalState extends State<SelectHospital> {
     );
   }
 
-  Future<bool> loadHospitals() async {
-    List<Hospital> result = [];
-    var value = await FirebaseFirestore.instance.collection('hospital').get();
-    for (var docSnapshot in value.docs) {
-      Map<String, dynamic> map = docSnapshot.data();
-      result.add(Hospital(
-        id: docSnapshot.id,
-        name: map.containsKey('name') ? map['name'] : 'No Name',
-        address: map.containsKey('address') ? map['address'] : 'No Address',
-        number: map.containsKey('call') ? map['call'] : 'No Number',
-        distance: 0.0,
-      ));
-    }
-
-    setState(() {
-      hospitals = result;
-    });
-    return true;
-  }
-
   // 関数定義
   /*
   関数概要：病院を近い順にソート
-  places 病院のドキュメントのリスト
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
-  Future<List<dynamic>> getSortedHospitalList(hospitalDocList, origin) async {
-    List<Map<String, dynamic>> hospitalList = [];
-    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
-    hospitalDocList.forEach((value) async {
-      double originLat = value.place.latitude;
-      double originLng = value.place.longitude;
-      double destLat = origin[0];
-      double destLng = origin[1];
-      String mode = 'driving';
+  Future<List<Hospital>> getSortedHospitalList(
+      Position origin, List<String> selectedDepartments) async {
+    int distanceValue; //現在地から病院までの距離
+    int durationValue;
+    String distanceText;
+    String durationText;
+    List filteredHospitals = [];
 
-      String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
-          'origins=$originLat,$originLng'
-          '&destinations=$destLat,$destLng'
-          '&mode=$mode'
-          '&key=$apiKey';
-      final response = await http.get(Uri.parse(url));
-      final responseBody = response.body;
-      // TODO : リンクから距離を取得してソートする
-      Map<String, dynamic> responseData = json.decode(responseBody);
-      int distanceValue =
-          responseData['row'][0]['elements'][0]['distance']['value'];
-      hospitalList.add({'place': value, 'distance': distanceValue});
+    var snapshot =
+        await FirebaseFirestore.instance.collection('hospital').get();
+    var documents = snapshot.docs;
+    for (var document in documents) {
+      bool allDepartmentsSelected = true;
+
+      //selectedDepartmentsがtrueであるかをチェック
+      for (var department in selectedDepartments) {
+        if (document.data()['department'][department]['accepted'] == false ||
+            document.data()['department'][department]['numOfAccepted'] <= 0) {
+          allDepartmentsSelected = false;
+          break;
+        }
+      }
+      if (allDepartmentsSelected) {
+        filteredHospitals.add(document);
+      }
+    }
+    List<Hospital> hospitalList = [];
+    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
+    await Future.forEach(filteredHospitals, (value) async {
+      //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
+      dynamic data = value.data();
+      String name = data.containsKey('name') ? data['name'] : 'No Name';
+      String address =
+          data.containsKey('address') ? data['address'] : 'No Name';
+      String call = data.containsKey('call') ? data['call'] : 'No Call Number';
+      if (!value.data().containsKey('place') ||
+          origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
+        hospitalList.add(Hospital(
+            id: value.id,
+            name: name,
+            address: address,
+            number: call,
+            distance: 'No Result',
+            duration: 'No Result',
+            distanceValue: 99999,
+            durationValue: 99999));
+      } else {
+        double originLat = value['place'].latitude;
+        double originLng = value['place'].longitude;
+        double destLat = origin.latitude;
+        double destLng = origin.longitude;
+        String mode = 'driving';
+        String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
+            'origins=$originLat,$originLng'
+            '&destinations=$destLat,$destLng'
+            '&mode=$mode'
+            '&key=$apiKey';
+        final response = await http.get(Uri.parse(url));
+        final responseBody = response.body;
+        // リンクから距離を取得してソートする
+        Map<String, dynamic> responseData = json.decode(responseBody);
+        if (responseData['rows'][0]['elements'][0]['status'] ==
+            "ZERO_RESULTS") {
+          distanceValue = 999999;
+          hospitalList.add(Hospital(
+              id: value.id,
+              name: name,
+              address: address,
+              number: call,
+              distance: 'Unreachable',
+              duration: '',
+              distanceValue: 999999,
+              durationValue: 999999));
+        } else {
+          distanceValue =
+              responseData['rows'][0]['elements'][0]['distance']['value'];
+          durationValue =
+              responseData['rows'][0]['elements'][0]['duration']['value'];
+          distanceText =
+              responseData['rows'][0]['elements'][0]['distance']['text'];
+          durationText =
+              responseData['rows'][0]['elements'][0]['duration']['text'];
+          hospitalList.add(Hospital(
+              id: value.id,
+              name: name,
+              address: address,
+              number: call,
+              distance: distanceText,
+              duration: durationText,
+              distanceValue: distanceValue,
+              durationValue: durationValue));
+        }
+      }
     });
     //ソート
-    hospitalList.sort((a, b) => a['distance'].compareTo(b['distance']));
+    hospitalList.sort((a, b) => a.distanceValue.compareTo(b.distanceValue));
     return hospitalList;
   }
 }
@@ -115,13 +183,16 @@ class HospitalCard extends StatelessWidget {
     required this.address,
     required this.number,
     required this.id,
+    required this.distance,
+    required this.duration,
   });
 
   final String name;
   final String address;
   final String number;
   final String id;
-
+  final String distance;
+  final String duration;
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -152,6 +223,8 @@ class HospitalCard extends StatelessWidget {
                     text: address),
                 TextWithIcon(
                     textStyle: normalStyle, iconData: Icons.call, text: number),
+                TextWithIcon(
+                    iconData: Icons.directions, text: '$distance($duration)'),
               ],
             ),
           ),
