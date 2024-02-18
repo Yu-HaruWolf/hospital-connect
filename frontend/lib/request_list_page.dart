@@ -51,9 +51,13 @@ class HospitalCard extends StatelessWidget {
       fontSize: 20,
     );
     TextStyle normalStyle = const TextStyle();
+    appState.oldscreenId = appState.screenId;
     return Card(
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          appState.selectedHospitalId = id;
+          appState.screenId = 7;
+        },
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
           child: Padding(

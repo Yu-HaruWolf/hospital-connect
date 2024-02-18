@@ -137,7 +137,7 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                   children: [
                     if (geopoint != null)
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.5,
+                        height: MediaQuery.of(context).size.height * 0.4,
                         child: GoogleMap(
                           initialCameraPosition: CameraPosition(
                             target: latLng,
@@ -169,7 +169,9 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                   ],
                 );
               }),
-          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: TextWithIcon(
