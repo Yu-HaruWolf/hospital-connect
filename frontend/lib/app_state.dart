@@ -50,7 +50,7 @@ class ApplicationState extends ChangeNotifier {
           }
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
-          loggedInHospital = doc.data()!['hospital'];
+          loggedInHospital = doc.data()!['hospital'].id;
         }
         _departmentSubscription = FirebaseFirestore.instance
             .collection('department')

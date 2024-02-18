@@ -26,12 +26,29 @@ class _SettingPageState extends State<SettingPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: Center(child: Text('Department')),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.15,
+                child: Center(child: Text('Active')),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.15,
+                child: Center(child: Text('Amount')),
+              ),
+            ],
+          ),
           for (int i = 0; i < numOfDepartment; i++)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.7,
                   child: DropdownButton(
                     isExpanded: true,
                     items: const [
@@ -50,6 +67,13 @@ class _SettingPageState extends State<SettingPage> {
                         isSelectedValue[i] = value!;
                       });
                     },
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                  child: Checkbox(
+                    value: true,
+                    onChanged: (bool? value) {},
                   ),
                 ),
                 SizedBox(
