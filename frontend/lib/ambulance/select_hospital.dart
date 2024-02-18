@@ -84,9 +84,6 @@ class _SelectHospitalState extends State<SelectHospital> {
     String durationText;
     List filteredHospitals = [];
 
-    /*追加
-    選択された診療科すべて満たす病院で絞り込み
-    */
     var snapshot =
         await FirebaseFirestore.instance.collection('hospital').get();
     var documents = snapshot.docs;
@@ -95,7 +92,8 @@ class _SelectHospitalState extends State<SelectHospital> {
 
       //selectedDepartmentsがtrueであるかをチェック
       for (var department in selectedDepartments) {
-        if (document.data()['department'][department]['accepted'] != true) {
+        if (document.data()['department'][department]['accepted'] == false ||
+            document.data()['department'][department]['numOfAccepted'] <= 0) {
           allDepartmentsSelected = false;
           break;
         }
@@ -108,13 +106,18 @@ class _SelectHospitalState extends State<SelectHospital> {
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
     await Future.forEach(filteredHospitals, (value) async {
       //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
+      dynamic data = value.data();
+      String name = data.containsKey('name') ? data['name'] : 'No Name';
+      String address =
+          data.containsKey('address') ? data['address'] : 'No Name';
+      String call = data.containsKey('call') ? data['call'] : 'No Call Number';
       if (!value.data().containsKey('place') ||
           origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
         hospitalList.add(Hospital(
             id: value.id,
-            name: value.data()['name'],
-            address: value.data()['address'],
-            number: value.data()['call'],
+            name: name,
+            address: address,
+            number: call,
             distance: 'No Result',
             duration: 'No Result',
             distanceValue: 99999,
@@ -139,9 +142,9 @@ class _SelectHospitalState extends State<SelectHospital> {
           distanceValue = 999999;
           hospitalList.add(Hospital(
               id: value.id,
-              name: value.data()['name'],
-              address: value.data()['address'],
-              number: value.data()['call'],
+              name: name,
+              address: address,
+              number: call,
               distance: 'Unreachable',
               duration: '',
               distanceValue: 999999,
@@ -157,9 +160,9 @@ class _SelectHospitalState extends State<SelectHospital> {
               responseData['rows'][0]['elements'][0]['duration']['text'];
           hospitalList.add(Hospital(
               id: value.id,
-              name: value.data()['name'],
-              address: value.data()['address'],
-              number: value.data()['call'],
+              name: name,
+              address: address,
+              number: call,
               distance: distanceText,
               duration: durationText,
               distanceValue: distanceValue,
