@@ -53,14 +53,14 @@ class _SelectHospitalState extends State<SelectHospital> {
             }
             return Column(
               children: [
-                for (dynamic value in snapshot.data!)
+                for (Hospital hospital in snapshot.data!)
                   HospitalCard(
-                    id: value.id,
-                    name: value.name,
-                    address: value.address,
-                    number: value.number,
-                    distance: value.distance,
-                    duration: value.duration,
+                    id: hospital.id,
+                    name: hospital.name,
+                    address: hospital.address,
+                    number: hospital.number,
+                    distance: hospital.distance,
+                    duration: hospital.duration,
                   )
               ],
             );
@@ -76,13 +76,13 @@ class _SelectHospitalState extends State<SelectHospital> {
   origin 現在地[緯度,経度]
   戻り値：ソートされた病院ドキュメントリスト
   */
-  Future<List<dynamic>> getSortedHospitalList(
+  Future<List<Hospital>> getSortedHospitalList(
       Position origin, List<String> selectedDepartments) async {
     int distanceValue; //現在地から病院までの距離
     int durationValue;
     String distanceText;
     String durationText;
-    List filterdHospitals=[];
+    List filterdHospitals = [];
 
     /*追加
     選択された診療科すべて満たす病院で絞り込み
@@ -90,23 +90,24 @@ class _SelectHospitalState extends State<SelectHospital> {
     var snapshot =
         await FirebaseFirestore.instance.collection('hospital').get();
     var documents = snapshot.docs;
-    for(var document in documents){
+    for (var document in documents) {
       bool allDepartmentsSelected = true;
-      
+
       //selectedDepartmentsがtrueであるかをチェック
-      for(var department in selectedDepartments){
-        if(document.data()[department].containsKey('accepted') != true){
+      for (var department in selectedDepartments) {
+        if (document.data()[department].containsKey('accepted') != true) {
           allDepartmentsSelected = false;
           break;
         }
       }
-      if(allDepartmentsSelected){
+      if (allDepartmentsSelected) {
         filterdHospitals.add(document);
       }
     }
     List<Hospital> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
-    await Future.forEach(filterdHospitals, (value) async { //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
+    await Future.forEach(filterdHospitals, (value) async {
+      //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
       if (!value.data().containsKey('place') ||
           origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
         hospitalList.add(Hospital(
