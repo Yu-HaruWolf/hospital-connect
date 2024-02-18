@@ -17,6 +17,8 @@ String randomString() {
 }
 
 class ChatRoom extends StatefulWidget {
+  const ChatRoom({super.key});
+
   @override
   State<ChatRoom> createState() => _ChatRoomState();
 }

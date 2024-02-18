@@ -8,6 +8,8 @@ import 'app_state.dart';
 import 'sign_in_page.dart';
 
 class TopPage extends StatelessWidget {
+  const TopPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -20,7 +22,7 @@ class TopPage extends StatelessWidget {
         case -1:
           return Column(
             children: [
-              Text('You are unauthorized.'),
+              const Text('You are unauthorized.'),
               signOutButton,
             ],
           );
@@ -36,7 +38,7 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 1;
                         },
-                        child: Text('病院を検索'))),
+                        child: const Text('病院を検索'))),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -47,9 +49,10 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 6;
                         },
-                        child: Text('リクエスト一覧'))),
+                        child: const Text('リクエスト一覧'))),
               ),
               signOutButton,
+              Text('GPS: ${appState.isReadyGPS ? 'Ready.' : 'Not Ready.'}'),
             ],
           );
         case 2:
@@ -64,7 +67,7 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 6;
                         },
-                        child: Text('リクエスト一覧'))),
+                        child: const Text('リクエスト一覧'))),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -75,7 +78,7 @@ class TopPage extends StatelessWidget {
                     onPressed: () {
                       appState.screenId = 5;
                     },
-                    child: Text('人数変更'),
+                    child: const Text('人数変更'),
                   ),
                 ),
               ),
@@ -83,7 +86,7 @@ class TopPage extends StatelessWidget {
             ],
           );
       }
-      return Text('Unknown Screen');
+      return const Text('Unknown Screen');
     } else {
       // 未ログイン時
       return Column(
