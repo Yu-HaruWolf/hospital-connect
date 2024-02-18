@@ -70,9 +70,9 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       "hospital": hospitalId,
       "status": 'pending',
       "patient": patientDocumentRefs,
-      "timeOfCreatingRequest" : now,
-      "timeOfLastChat" : FieldValue.delete(),
-      "timeOfResponse" : FieldValue.delete()
+      "timeOfCreatingRequest": now,
+      "timeOfLastChat": now,
+      "timeOfResponse": now,
     });
   }
 
