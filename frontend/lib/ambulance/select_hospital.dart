@@ -34,7 +34,6 @@ class _SelectHospitalState extends State<SelectHospital> {
             headingAccuracy: 0.0,
             speed: 0.0,
             speedAccuracy: 0.0);
-    print(position);
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
