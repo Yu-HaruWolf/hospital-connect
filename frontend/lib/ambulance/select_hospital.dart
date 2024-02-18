@@ -52,6 +52,7 @@ class _SelectHospitalState extends State<SelectHospital> {
             }
             return Column(
               children: [
+                if (snapshot.data!.isEmpty) const Text('No Result'),
                 for (Hospital hospital in snapshot.data!)
                   HospitalCard(
                     id: hospital.id,
@@ -81,7 +82,7 @@ class _SelectHospitalState extends State<SelectHospital> {
     int durationValue;
     String distanceText;
     String durationText;
-    List filterdHospitals = [];
+    List filteredHospitals = [];
 
     /*追加
     選択された診療科すべて満たす病院で絞り込み
@@ -94,18 +95,18 @@ class _SelectHospitalState extends State<SelectHospital> {
 
       //selectedDepartmentsがtrueであるかをチェック
       for (var department in selectedDepartments) {
-        if (document.data()[department].containsKey('accepted') != true) {
+        if (document.data()['department'][department]['accepted'] != true) {
           allDepartmentsSelected = false;
           break;
         }
       }
       if (allDepartmentsSelected) {
-        filterdHospitals.add(document);
+        filteredHospitals.add(document);
       }
     }
     List<Hospital> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
-    await Future.forEach(filterdHospitals, (value) async {
+    await Future.forEach(filteredHospitals, (value) async {
       //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
       if (!value.data().containsKey('place') ||
           origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
