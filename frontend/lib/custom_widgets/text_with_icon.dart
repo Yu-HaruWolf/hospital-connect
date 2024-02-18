@@ -20,9 +20,11 @@ class TextWithIcon extends StatelessWidget {
           iconData,
           color: Colors.black38,
         ),
-        Text(
-          text,
-          style: textStyle,
+        Flexible(
+          child: Text(
+            text,
+            style: textStyle,
+          ),
         ),
       ],
     );

@@ -30,6 +30,9 @@ class ApplicationState extends ChangeNotifier {
   List<Department> get departments => _departments;
   int userType = -1; // -1:未認証/未登録 1:救急隊 2:病院
 
+  // 病院用関連付け
+  String loggedInHospital = "";
+
   Future<void> firebaseInit() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
@@ -50,6 +53,7 @@ class ApplicationState extends ChangeNotifier {
           gpsInit();
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
+          loggedInHospital = doc.data()!['hospital'].id;
         }
         _departmentSubscription = FirebaseFirestore.instance
             .collection('department')
@@ -65,6 +69,7 @@ class ApplicationState extends ChangeNotifier {
         _loggedIn = false;
         _departmentSubscription?.cancel();
         userType = -1;
+        loggedInHospital = "";
       }
       notifyListeners();
     });
