@@ -2,6 +2,7 @@ import 'dart:async';
 //import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -49,8 +50,34 @@ class _HospitalDetailsState extends State<HospitalDetails> {
     });
   }
 
-  //関数作成
-  void createRequest(String hospitalId) {}
+  //関数作成 // 診療科(複数個)、病院のドキュメントID、progress
+  void createRequest(String hospitalId, List<String> patientsName) {
+    var now = FieldValue.serverTimestamp();
+    //Timestamp now = Timestamp.fromDate()
+    //DateTime now = DateTime.now(); //現在の日時を取得
+    /* マップで管理した方が見やすい？　ただ、クエリで検索するときできるか不安
+    Map<String, dynamic> timeData = {
+      'lastChatTime' : now,
+      'createRequestTime' : now,
+      'responseTime' : '',
+    };
+    */
+    final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
+        [];
+    for (var value in patientsName) {
+      patientDocumentRefs
+          .add(FirebaseFirestore.instance.collection('department').doc(value));
+    }
+    FirebaseFirestore.instance.collection('request').add({
+      "ambulance": FirebaseAuth.instance.currentUser!.uid,
+      "hospital": hospitalId,
+      "status": 'pending',
+      "patient": patientDocumentRefs,
+      "timeOfCreatingRequest": now,
+      "timeOfLastChat": now,
+      "timeOfResponse": now,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +203,8 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                   ElevatedButton(
                     onPressed: () {
                       changeStatus(hospitalStatus == 0 ? 1 : 0);
+                      createRequest(appState.selectedHospitalId,
+                          appState.selectedDepartments);
                     },
                     style: requeststyle,
                     child: Text(hospitalStatus == 0 ? 'Request' : 'cancel'),
