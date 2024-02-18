@@ -49,6 +49,16 @@ class _HospitalDetailsState extends State<HospitalDetails> {
 
   //関数作成 // 診療科(複数個)、病院のドキュメントID、progress
   void createRequest(String hospitalId, List<String> patientsName) {
+    var now = FieldValue.serverTimestamp();
+    //Timestamp now = Timestamp.fromDate()
+    //DateTime now = DateTime.now(); //現在の日時を取得
+    /* マップで管理した方が見やすい？　ただ、クエリで検索するときできるか不安
+    Map<String, dynamic> timeData = {
+      'lastChatTime' : now,
+      'createRequestTime' : now,
+      'responseTime' : '',
+    };
+    */
     final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
         [];
     for (var value in patientsName) {
@@ -59,7 +69,10 @@ class _HospitalDetailsState extends State<HospitalDetails> {
       "ambulance": FirebaseAuth.instance.currentUser!.uid,
       "hospital": hospitalId,
       "status": 'pending',
-      "patient": patientDocumentRefs
+      "patient": patientDocumentRefs,
+      "timeOfCreatingRequest" : now,
+      "timeOfLastChat" : FieldValue.delete(),
+      "timeOfResponse" : FieldValue.delete()
     });
   }
 
