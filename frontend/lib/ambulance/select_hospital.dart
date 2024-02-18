@@ -82,11 +82,31 @@ class _SelectHospitalState extends State<SelectHospital> {
     int durationValue;
     String distanceText;
     String durationText;
+    List filterdHospitals=[];
+
+    /*追加
+    選択された診療科すべて満たす病院で絞り込み
+    */
     var snapshot =
         await FirebaseFirestore.instance.collection('hospital').get();
+    var documents = snapshot.docs;
+    for(var document in documents){
+      bool allDepartmentsSelected = true;
+      
+      //selectedDepartmentsがtrueであるかをチェック
+      for(var department in selectedDepartments){
+        if(document.data()[department].containsKey('accepted') != true){
+          allDepartmentsSelected = false;
+          break;
+        }
+      }
+      if(allDepartmentsSelected){
+        filterdHospitals.add(document);
+      }
+    }
     List<Hospital> hospitalList = [];
     String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
-    await Future.forEach(snapshot.docs, (value) async {
+    await Future.forEach(filterdHospitals, (value) async { //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
       if (!value.data().containsKey('place') ||
           origin.timestamp == DateTime.fromMillisecondsSinceEpoch(0)) {
         hospitalList.add(Hospital(
