@@ -200,6 +200,7 @@ class HospitalCard extends StatelessWidget {
       fontSize: 20,
     );
     TextStyle normalStyle = const TextStyle();
+    appState.oldscreenId = appState.screenId;
     return Card(
       child: InkWell(
         onTap: () {

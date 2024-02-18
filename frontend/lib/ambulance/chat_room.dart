@@ -6,9 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:provider/provider.dart';
-
-import '../app_state.dart';
 
 String randomString() {
   final random = Random.secure();
@@ -52,11 +49,12 @@ class _ChatRoomState extends State<ChatRoom> {
   final _user = types.User(id: FirebaseAuth.instance.currentUser!.uid);
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<ApplicationState>();
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) => appState.screenId = 3,
-      child: Chat(
+    return Scaffold(
+      // Scaffold を返す
+      appBar: AppBar(
+        title: const Text('Chat Room'),
+      ),
+      body: Chat(
         messages: _messages,
         onSendPressed: _handleSendPressed,
         user: _user,

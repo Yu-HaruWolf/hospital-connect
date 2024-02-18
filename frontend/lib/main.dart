@@ -53,11 +53,10 @@ class _MyHomePageState extends State<MyHomePage> {
     var appState = context
         .read<ApplicationState>(); // context.watch() を context.read() に変更
 
-    // _selectedIndex の値に応じて screenId を変更
     if (index == 0) {
-      appState.screenId = 2;
+      appState.screenId = appState.oldscreenId;
     } else if (index == 1) {
-      appState.screenId = 4;
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatRoom()));
     }
   }
 
@@ -164,7 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
         ]),
       ),
-      bottomNavigationBar: appState.screenId == 3
+
+      
+
+      bottomNavigationBar: appState.screenId == 3 || appState.screenId == 7
           ? BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(

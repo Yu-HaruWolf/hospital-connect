@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 
 class RequestDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<ApplicationState>();
     return Column(
       children: [
         const TextWithIcon(iconData: Icons.phone, text: '000000000'),
