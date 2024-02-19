@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '246901411650',
     projectId: 'tcu-rescue',
     storageBucket: 'tcu-rescue.appspot.com',
-    iosBundleId: 'com.example.frontend',
+    iosBundleId: 'com.github.yu_haruwolf.fast_rescue',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -75,6 +75,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '246901411650',
     projectId: 'tcu-rescue',
     storageBucket: 'tcu-rescue.appspot.com',
-    iosBundleId: 'com.example.frontend.RunnerTests',
+    iosBundleId: 'com.github.yu_haruwolf.fast_rescue.RunnerTests',
   );
 }
