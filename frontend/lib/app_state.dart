@@ -110,10 +110,18 @@ class ApplicationState extends ChangeNotifier {
   }
 
   // 病院選択ステート
-  var _selectedHospitalId = "";
+  String _selectedHospitalId = "";
   String get selectedHospitalId => _selectedHospitalId;
   set selectedHospitalId(String id) {
     _selectedHospitalId = id;
+    notifyListeners();
+  }
+
+  // リクエスト選択ステート
+  String _selectedRequestId = "";
+  String get selectedRequestId => _selectedRequestId;
+  set selectedRequestId(String id) {
+    _selectedRequestId = id;
     notifyListeners();
   }
 }

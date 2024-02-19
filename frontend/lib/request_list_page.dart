@@ -123,7 +123,7 @@ class RequestCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          appState.selectedHospitalId = id;
+          appState.selectedRequestId = id;
           appState.screenId = 7;
         },
         child: SizedBox(
