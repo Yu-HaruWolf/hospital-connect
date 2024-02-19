@@ -1,23 +1,235 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 
 class RequestDetail extends StatelessWidget {
+
   @override
+//関数作成 // 診療科(複数個)、病院のドキュメントID、progress
+  void createRequest(String hospitalId, List<String> patientsName) {
+    var now = FieldValue.serverTimestamp();
+    //Timestamp now = Timestamp.fromDate()
+    //DateTime now = DateTime.now(); //現在の日時を取得
+    /* マップで管理した方が見やすい？　ただ、クエリで検索するときできるか不安
+    Map<String, dynamic> timeData = {
+      'lastChatTime' : now,
+      'createRequestTime' : now,
+      'responseTime' : '',
+    };
+    */
+    final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
+        [];
+    for (var value in patientsName) {
+      patientDocumentRefs
+          .add(FirebaseFirestore.instance.collection('department').doc(value));
+    }
+    FirebaseFirestore.instance.collection('request').add({
+      //"ambulance": FirebaseAuth.instance.currentUser!.uid,
+      "hospital": hospitalId,
+      "status": 'pending',
+      "patient": patientDocumentRefs,
+      "timeOfCreatingRequest": now,
+      "timeOfLastChat": now,
+      "timeOfResponse": now,
+    });
+  }
+
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
-    return Column(
-      children: [
-        const TextWithIcon(iconData: Icons.phone, text: '000000000'),
-        const TextWithIcon(iconData: Icons.domain, text: 'Departments'),
-        ElevatedButton(onPressed: () {}, child: const Text('Approve')),
-        ElevatedButton(onPressed: () {}, child: const Text('Chat')),
-      ],
+    var docRef_hospital = FirebaseFirestore.instance
+        .collection('hospital')
+        .doc('4OWMRebFOJsbcNiDCn34')//要確認
+        .get();
+        
+    var docRef_request = FirebaseFirestore.instance
+        .collection('request')
+        .doc('2IyLhxrvEssC9chPpWE6')//要確認
+        .get();
+
+/*  テキストスタイル  */
+  TextStyle normalStyle = const TextStyle(fontSize: 20);
+  TextStyle titleStyle = const TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    );
+  TextStyle nameStyle = const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+    );
+  ButtonStyle approvebutton = ButtonStyle(
+    backgroundColor: const MaterialStatePropertyAll(Colors.white),
+    foregroundColor: const MaterialStatePropertyAll(Colors.red),
+    side: const MaterialStatePropertyAll(
+      BorderSide(color: Colors.black, width: 2)),
+    shape: MaterialStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+    ),
+  );
+
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        appState.screenId = 2;
+      },
+      child: SingleChildScrollView(
+        child: FutureBuilder(
+            future: docRef_request,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Error!');
+              }
+              if (!snapshot.hasData) {
+                return const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                  ],
+                );
+              }
+
+              final timeOfCreatingRequest = snapshot.data!.data()!.containsKey('timeOfCreatingRequest')
+                  ? snapshot.data!.data()!['timeOfCreatingRequest']
+                  : 'No timeOfCreatingRequest';
+              final status = snapshot.data!.data()!.containsKey('status')
+                  ? snapshot.data!.data()!['status']
+                  : 'No timeOfLastChat';
+              final timeOfLastChat = snapshot.data!.data()!.containsKey('timeOfLastChat')
+                  ? snapshot.data!.data()!['timeOfLastChat']
+                  : 'No timeOfLastChat';
+              Timestamp timeOfResponse = snapshot.data!.data()!.containsKey('timeOfResponse')
+                  ? snapshot.data!.data()!['timeOfResponse']
+                  : 'No timeOfResponse';
+
+              return Column(
+                //mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FutureBuilder(
+                    future: docRef_hospital,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Text('Error!');
+                      }
+                      if (!snapshot.hasData) {
+                        return const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                          ],
+                        );
+                      }
+                        
+                      final name = snapshot.data!.data()!.containsKey('name')
+                          ? snapshot.data!.data()!['name']
+                          : 'No Name';
+                      final address = snapshot.data!.data()!.containsKey('address')
+                          ? snapshot.data!.data()!['address']
+                          : 'No Address';
+                      final number = snapshot.data!.data()!.containsKey('call')
+                          ? snapshot.data!.data()!['call']
+                          : 'No call';
+                      final GeoPoint? geopoint =
+                          snapshot.data!.data()!.containsKey('place')
+                              ? snapshot.data!.data()!['place']
+                              : null;
+                      return Column(
+                        children: [
+                          Text(
+                              name,
+                              style: nameStyle,
+                            ),
+                            TextWithIcon(
+                              textStyle: normalStyle,
+                              iconData: Icons.domain,
+                              text: address,
+                            ),
+                            TextWithIcon(
+                              textStyle: normalStyle,
+                              iconData: Icons.call,
+                              text: number,
+                            ),
+                        ],
+                      );
+                  }),
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '<リクエスト送信日時>',
+                          style: titleStyle,
+                        ),
+                        if (appState.userType == 1)
+                          TextWithIcon(
+                            iconData: Icons.send, 
+                            textStyle: normalStyle,
+                            text: timeOfCreatingRequest.toDate().toString(),),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('<最終チャット日時>',
+                          style: titleStyle,),
+                          TextWithIcon(
+                          iconData:Icons.schedule, 
+                          textStyle: normalStyle,
+                          text: timeOfResponse.toDate().toString()),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('<最終更新日時>',
+                          style: titleStyle,),
+                          TextWithIcon(
+                          iconData:Icons.chat,
+                          textStyle: normalStyle, 
+                          text: timeOfLastChat.toDate().toString()),
+                      ],
+                    ),
+                  ),                  
+                  //if(appState.userType ==2)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                    Text( 
+                      'リクエスト状況:  ${status}',
+                      style: TextStyle(
+                        fontSize: 25,
+                        color: status == 'pending' ? Colors.red : Colors.green,
+                        fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    Padding(
+                      padding:EdgeInsets.all(10),
+                      child: appState.userType == 2 && status == 'pending'
+                      ?  ElevatedButton(
+                          onPressed: () {}, 
+                          child: const Text('Approve'),
+                          style: approvebutton,)
+                      :null
+                    ),
+                  ]),
+                ],
+              );
+            }),
+      ),
     );
   }
+            
 }
 
 //関数：requestのstatusを変更する approve, pedding, reject
@@ -44,3 +256,4 @@ void updateLastChatTime(String requestId){
     "timeOfLastChat" : now,
   });
 }
+
