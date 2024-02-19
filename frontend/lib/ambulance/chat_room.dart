@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:frontend/app_state.dart';
+import 'package:provider/provider.dart';
 
 String randomString() {
   final random = Random.secure();
@@ -21,11 +23,19 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> {
+  late CollectionReference<Map<String, dynamic>> chatCollection;
+  late StreamSubscription<QuerySnapshot> _chatMessageSubscription;
+  List<types.TextMessage> _messages = [];
+  final _user = types.User(id: FirebaseAuth.instance.currentUser!.uid);
+
   @override
   initState() {
     super.initState();
-    _chatMessageSubscription = FirebaseFirestore.instance
-        .collection('testchat')
+    chatCollection = FirebaseFirestore.instance
+        .collection('request')
+        .doc(context.read<ApplicationState>().selectedRequestId)
+        .collection('chat');
+    _chatMessageSubscription = chatCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
@@ -33,7 +43,7 @@ class _ChatRoomState extends State<ChatRoom> {
         _messages = [];
         for (final document in snapshot.docs) {
           _messages.add(types.TextMessage(
-            author: types.User(id: document.data()['name']),
+            author: types.User(id: document.data()['authorId']),
             id: document.id,
             createdAt: document.data()['createdAt'],
             text: document.data()['text'],
@@ -43,10 +53,12 @@ class _ChatRoomState extends State<ChatRoom> {
     });
   }
 
-  late StreamSubscription<QuerySnapshot> _chatMessageSubscription;
+  @override
+  void dispose() {
+    _chatMessageSubscription.cancel();
+    super.dispose();
+  }
 
-  List<types.TextMessage> _messages = [];
-  final _user = types.User(id: FirebaseAuth.instance.currentUser!.uid);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,14 +86,25 @@ class _ChatRoomState extends State<ChatRoom> {
 
   void _addMessage(types.TextMessage message) {
     Map<String, dynamic> data = {
-      "name": message.author.id,
+      "authorId": message.author.id,
       "createdAt": message.createdAt,
       "text": message.text
     };
 
-    FirebaseFirestore.instance.collection('testchat').add(data);
+    chatCollection.add(data);
+    updateLastChatTime();
     setState(() {
       _messages.insert(0, message);
+    });
+  }
+
+  void updateLastChatTime() {
+    String requestId = context.read<ApplicationState>().selectedRequestId;
+    var now = FieldValue.serverTimestamp();
+    DocumentReference requestRef =
+        FirebaseFirestore.instance.collection('request').doc(requestId);
+    requestRef.update({
+      "timeOfLastChat": now,
     });
   }
 }
