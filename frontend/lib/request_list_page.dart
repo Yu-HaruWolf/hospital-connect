@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/request.dart';
 import 'package:provider/provider.dart';
@@ -48,8 +49,16 @@ class _RequestListPageState extends State<RequestListPage> {
   }
 
   Future<void> getRequestList() async {
-    documentSubscription = FirebaseFirestore.instance
-        .collection('request')
+    Query<Map<String, dynamic>> query;
+    if (context.read<ApplicationState>().userType == 2) {
+      query = FirebaseFirestore.instance.collection('request').where('hospital',
+          isEqualTo: context.read<ApplicationState>().loggedInHospital);
+    } else {
+      query = FirebaseFirestore.instance.collection('request').where(
+          'ambulance',
+          isEqualTo: FirebaseAuth.instance.currentUser!.uid);
+    }
+    documentSubscription = query
         .orderBy('timeOfLastChat', descending: true)
         .snapshots()
         .listen((event) {
