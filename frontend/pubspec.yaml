@@ -46,6 +46,7 @@ dependencies:
   geolocator: ^10.1.1
   http: ^1.2.0
   flutter_chat_types: ^3.6.2
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -99,3 +100,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_icons:
+  android: true
+  image_path: "app_icon.png"

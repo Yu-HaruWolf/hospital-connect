@@ -29,12 +29,12 @@ class MyApp extends StatelessWidget {
     var appState = context.watch<ApplicationState>();
     //print(appState.selectedHospitalId);
     return MaterialApp(
-      title: 'TCU Rescue',
+      title: 'Hospital Connect',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'TCU Rescue'),
+      home: const MyHomePage(title: 'Hospital Connect'),
     );
   }
 }
@@ -56,7 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (index == 0) {
       appState.screenId = appState.oldscreenId;
     } else if (index == 1) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatRoom()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const ChatRoom()));
     }
   }
 
@@ -163,9 +164,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
         ]),
       ),
-
-      
-
       bottomNavigationBar: appState.screenId == 3 || appState.screenId == 7
           ? BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
