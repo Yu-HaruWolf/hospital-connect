@@ -9,10 +9,13 @@ import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 
 class RequestDetail extends StatelessWidget {
+  const RequestDetail({super.key});
+
+  @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
 
-    var docRef_request = FirebaseFirestore.instance
+    var docRefRequest = FirebaseFirestore.instance
         .collection('request')
         .doc(appState.selectedRequestId)
         .get();
@@ -46,7 +49,7 @@ class RequestDetail extends StatelessWidget {
       },
       child: SingleChildScrollView(
         child: FutureBuilder(
-            future: docRef_request,
+            future: docRefRequest,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Error!');

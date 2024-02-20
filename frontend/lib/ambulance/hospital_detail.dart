@@ -2,7 +2,6 @@ import 'dart:async';
 //import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,8 @@ import '../custom_widgets/text_with_icon.dart';
 import '../app_state.dart';
 
 class HospitalDetails extends StatefulWidget {
+  const HospitalDetails({super.key});
+
   @override
   State<HospitalDetails> createState() => _HospitalDetailsState();
 }
@@ -41,9 +42,6 @@ class _HospitalDetailsState extends State<HospitalDetails> {
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position? position) {
       currentPosition = position;
-      print(position == null
-          ? 'Unknown'
-          : '${position.latitude.toString()}, ${position.longitude.toString()}');
     });
   }
 

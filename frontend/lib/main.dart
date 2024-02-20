@@ -217,6 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "timeOfResponse": now,
     });
     context.read<ApplicationState>().selectedRequestId = doc.id;
+    context.read<ApplicationState>().oldscreenId = 6;
     context.read<ApplicationState>().screenId = 7;
   }
 }
