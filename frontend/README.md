@@ -1,4 +1,4 @@
-# frontend
+# hospital_connect
 
 A new Flutter project.
 

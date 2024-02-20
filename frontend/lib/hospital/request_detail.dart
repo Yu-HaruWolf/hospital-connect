@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/request_settings.dart';
+import 'package:hospital_connect/request_settings.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +33,7 @@ class RequestDetail extends StatelessWidget {
       fontSize: 30,
       fontWeight: FontWeight.bold,
     );
-    ButtonStyle approveButtonStyle = ButtonStyle(
+    ButtonStyle responseButtonStyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll(Colors.white),
       foregroundColor: const MaterialStatePropertyAll(Colors.red),
       side: const MaterialStatePropertyAll(
@@ -264,7 +264,7 @@ class RequestDetail extends StatelessWidget {
                                               'accepted');
                                         },
                                         child: const Text('Accept'),
-                                        style: approveButtonStyle,
+                                        style: responseButtonStyle,
                                       )
                                     : null),
                             Padding(
@@ -278,7 +278,7 @@ class RequestDetail extends StatelessWidget {
                                               'denied');
                                         },
                                         child: const Text('Deny'),
-                                        style: approveButtonStyle,
+                                        style: responseButtonStyle,
                                       )
                                     : null),
                           ],
@@ -292,7 +292,6 @@ class RequestDetail extends StatelessWidget {
   }
 }
 
-//関数：requestのstatusを変更する approve, pedding, reject
 void updateRequestStatus(String requestId, String status) {
   var now = FieldValue.serverTimestamp();
   DocumentReference requestRef =
@@ -300,10 +299,7 @@ void updateRequestStatus(String requestId, String status) {
   requestRef.update({'status': status, "timeOfResponse": now});
 }
 
-// チャットのやりとり、最終更新日時を更新する関数。引数requestID
 void updateLastChatTime(String requestId) {
-  // FlutterのDateTime.now()だと端末情報の時間を取得してしまう
-  //サーバー環境に依存した時間を取り出したい場合
   var now = FieldValue.serverTimestamp();
   DocumentReference requestRef =
       FirebaseFirestore.instance.collection('request').doc(requestId);

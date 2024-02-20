@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/ambulance/department.dart';
+import 'package:hospital_connect/ambulance/department.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';

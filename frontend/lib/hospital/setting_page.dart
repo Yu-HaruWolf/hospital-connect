@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/ambulance/department.dart';
-import 'package:frontend/app_state.dart';
+import 'package:hospital_connect/ambulance/department.dart';
+import 'package:hospital_connect/app_state.dart';
 import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {

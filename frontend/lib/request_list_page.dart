@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/request.dart';
+import 'package:hospital_connect/request.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
@@ -133,7 +133,7 @@ class RequestCard extends StatelessWidget {
       case 'pending':
         cardColor = Theme.of(context).cardColor;
         break;
-      case 'approved':
+      case 'accepted':
         cardColor = Colors.green;
         break;
       case 'denied':

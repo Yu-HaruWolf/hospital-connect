@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "frontend",
+            "name": "hospital_connect",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "frontend (profile mode)",
+            "name": "hospital_connect (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "frontend (release mode)",
+            "name": "hospital_connect (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
