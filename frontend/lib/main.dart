@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/custom_widgets/text_with_icon.dart';
@@ -49,18 +50,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void onTapped(int index) {
-    var appState = context
-        .read<ApplicationState>(); // context.watch() を context.read() に変更
-
-    if (index == 0) {
-      appState.screenId = appState.oldscreenId;
-    } else if (index == 1) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const ChatRoom()));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -166,10 +155,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: appState.screenId == 3 || appState.screenId == 7
           ? BottomNavigationBar(
-              items: const <BottomNavigationBarItem>[
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                     icon: Icon(Icons.reply_outlined), label: '戻る'),
-                BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'チャット'),
+                if (appState.screenId == 3)
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.send), label: 'Request'),
+                if (appState.screenId == 7)
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.chat), label: 'チャット'),
               ],
               selectedItemColor: Colors.black,
               selectedFontSize: 20,
@@ -183,5 +177,46 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           : null,
     );
+  }
+
+  Future<void> onTapped(int index) async {
+    var appState = context
+        .read<ApplicationState>(); // context.watch() を context.read() に変更
+
+    if (index == 0) {
+      appState.screenId = appState.oldscreenId;
+    } else if (index == 1) {
+      if (appState.screenId == 3) {
+        appState.isLoading = true;
+        await createRequest(
+            appState.selectedHospitalId, appState.selectedDepartments);
+        appState.isLoading = false;
+      } else if (appState.screenId == 7) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const ChatRoom()));
+      }
+    }
+  }
+
+  Future<void> createRequest(
+      String hospitalId, List<String> patientsName) async {
+    var now = FieldValue.serverTimestamp();
+    final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
+        [];
+    for (var value in patientsName) {
+      patientDocumentRefs
+          .add(FirebaseFirestore.instance.collection('department').doc(value));
+    }
+    final doc = await FirebaseFirestore.instance.collection('request').add({
+      "ambulance": FirebaseAuth.instance.currentUser!.uid,
+      "hospital": hospitalId,
+      "status": 'pending',
+      "patient": patientDocumentRefs,
+      "timeOfCreatingRequest": now,
+      "timeOfLastChat": now,
+      "timeOfResponse": now,
+    });
+    context.read<ApplicationState>().selectedRequestId = doc.id;
+    context.read<ApplicationState>().screenId = 7;
   }
 }

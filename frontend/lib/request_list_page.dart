@@ -27,6 +27,12 @@ class _RequestListPageState extends State<RequestListPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    documentSubscription.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
@@ -41,6 +47,7 @@ class _RequestListPageState extends State<RequestListPage> {
                   title: request.patient,
                   department: request.hospital,
                   lastUpdateTime: request.lastChatTime.toDate().toString(),
+                  status: request.status,
                   id: request.id),
           ],
         ),
@@ -87,12 +94,14 @@ class RequestCard extends StatelessWidget {
     required this.title,
     required this.department,
     required this.lastUpdateTime,
+    required this.status,
     required this.id,
   });
 
   final List<dynamic> title;
   final String department;
   final String lastUpdateTime;
+  final String status;
   final String id;
 
   Future<String> getDepartmentsName(List<dynamic> docs) async {
@@ -119,8 +128,25 @@ class RequestCard extends StatelessWidget {
       fontSize: 20,
     );
     TextStyle normalStyle = const TextStyle();
+    late Color cardColor;
+    switch (status) {
+      case 'pending':
+        cardColor = Theme.of(context).cardColor;
+        break;
+      case 'approved':
+        cardColor = Colors.green;
+        break;
+      case 'denied':
+        cardColor = Colors.red;
+        break;
+      default:
+        cardColor = Colors.grey;
+        break;
+    }
+
     appState.oldscreenId = appState.screenId;
     return Card(
+      color: cardColor,
       child: InkWell(
         onTap: () {
           appState.selectedRequestId = id;

@@ -92,6 +92,14 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  // ローディング
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
   // 表示画面選択
   int _screenId = 0;
   int oldscreenId = 0;

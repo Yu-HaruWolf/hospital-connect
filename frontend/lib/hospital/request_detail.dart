@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
@@ -112,8 +115,38 @@ class RequestDetail extends StatelessWidget {
                             snapshot.data!.data()!.containsKey('place')
                                 ? snapshot.data!.data()!['place']
                                 : null;
+                        late Marker marker;
+                        late LatLng latLng;
+                        Set<Marker> markers = {};
+                        if (geopoint != null) {
+                          latLng =
+                              LatLng(geopoint.latitude, geopoint.longitude);
+                          marker = Marker(
+                            markerId: const MarkerId('0'),
+                            position: latLng,
+                          );
+                          markers.add(marker);
+                        }
                         return Column(
                           children: [
+                            if (geopoint != null)
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.4,
+                                child: GoogleMap(
+                                  initialCameraPosition: CameraPosition(
+                                    target: latLng,
+                                    zoom: 15.0,
+                                  ),
+                                  myLocationEnabled: true,
+                                  myLocationButtonEnabled: true,
+                                  markers: markers,
+                                  gestureRecognizers: {
+                                    Factory<OneSequenceGestureRecognizer>(
+                                        () => EagerGestureRecognizer())
+                                  },
+                                ),
+                              ),
                             Text(
                               name,
                               style: nameStyle,
