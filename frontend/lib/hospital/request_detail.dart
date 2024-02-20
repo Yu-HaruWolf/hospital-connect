@@ -1,7 +1,10 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/request_settings.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +33,7 @@ class RequestDetail extends StatelessWidget {
       fontSize: 30,
       fontWeight: FontWeight.bold,
     );
-    ButtonStyle approvebutton = ButtonStyle(
+    ButtonStyle approveButtonStyle = ButtonStyle(
       backgroundColor: const MaterialStatePropertyAll(Colors.white),
       foregroundColor: const MaterialStatePropertyAll(Colors.red),
       side: const MaterialStatePropertyAll(
@@ -79,6 +82,14 @@ class RequestDetail extends StatelessWidget {
                       ? snapshot.data!.data()!['timeOfResponse']
                       : 'No timeOfResponse';
               final hospitalId = snapshot.data!.data()!['hospital'];
+              List<String> requestedDepartments = [];
+              final departments = snapshot.data!.data()!.containsKey('patient')
+                  ? snapshot.data!.data()!['patient']
+                  : [];
+              for (DocumentReference<Map<String, dynamic>> department
+                  in departments) {
+                requestedDepartments.add(department.id);
+              }
 
               var docRef_hospital = FirebaseFirestore.instance
                   .collection('hospital')
@@ -176,12 +187,11 @@ class RequestDetail extends StatelessWidget {
                           '<リクエスト送信日時>',
                           style: titleStyle,
                         ),
-                        if (appState.userType == 1)
-                          TextWithIcon(
-                            iconData: Icons.send,
-                            textStyle: normalStyle,
-                            text: timeOfCreatingRequest.toDate().toString(),
-                          ),
+                        TextWithIcon(
+                          iconData: Icons.send,
+                          textStyle: normalStyle,
+                          text: timeOfCreatingRequest.toDate().toString(),
+                        ),
                       ],
                     ),
                   ),
@@ -191,7 +201,7 @@ class RequestDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終チャット日時>',
+                          '<最終更新日時>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -207,7 +217,7 @@ class RequestDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終更新日時>',
+                          '<最終チャット日時>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -230,15 +240,49 @@ class RequestDetail extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Padding(
-                            padding: EdgeInsets.all(10),
-                            child: appState.userType == 2 && status == 'pending'
-                                ? ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Approve'),
-                                    style: approvebutton,
-                                  )
-                                : null),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                                padding: EdgeInsets.all(10),
+                                child: appState.userType == 2 &&
+                                        status == 'pending'
+                                    ? ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    RequestSettingPage(
+                                                      requestedDepartments,
+                                                      departments:
+                                                          requestedDepartments,
+                                                    )),
+                                          );
+                                          updateRequestStatus(
+                                              appState.selectedRequestId,
+                                              'accepted');
+                                        },
+                                        child: const Text('Accept'),
+                                        style: approveButtonStyle,
+                                      )
+                                    : null),
+                            Padding(
+                                padding: EdgeInsets.all(10),
+                                child: appState.userType == 2 &&
+                                        status == 'pending'
+                                    ? ElevatedButton(
+                                        onPressed: () {
+                                          updateRequestStatus(
+                                              appState.selectedRequestId,
+                                              'denied');
+                                        },
+                                        child: const Text('Deny'),
+                                        style: approveButtonStyle,
+                                      )
+                                    : null),
+                          ],
+                        ),
                       ]),
                 ],
               );
@@ -264,6 +308,7 @@ void updateLastChatTime(String requestId) {
   DocumentReference requestRef =
       FirebaseFirestore.instance.collection('request').doc(requestId);
   requestRef.update({
+    "timeOfResponse": now,
     "timeOfLastChat": now,
   });
 }
