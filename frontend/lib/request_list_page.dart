@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:frontend/request.dart';
 import 'package:provider/provider.dart';
 
@@ -115,49 +116,81 @@ class RequestCard extends StatelessWidget {
     var appState = context.watch<ApplicationState>();
     var hospital =
         FirebaseFirestore.instance.collection('hospital').doc(department).get();
+    var docRef_request = FirebaseFirestore.instance
+        .collection('request')
+        .doc('2IyLhxrvEssC9chPpWE6') //要確認
+        .get();
     TextStyle nameStyle = const TextStyle(
       fontSize: 20,
     );
     TextStyle normalStyle = const TextStyle();
     appState.oldscreenId = appState.screenId;
-    return Card(
-      child: InkWell(
-        onTap: () {
-          appState.selectedRequestId = id;
-          appState.screenId = 7;
-        },
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FutureBuilder(
-                    future: getDepartmentsName(title),
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          iconData: Icons.fact_check,
-                          text: snapshot.hasData ? snapshot.data! : '',
-                          textStyle: nameStyle);
-                    }),
-                FutureBuilder(
-                    future: hospital,
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          textStyle: normalStyle,
-                          iconData: Icons.domain,
-                          text: snapshot.hasData ? snapshot.data!['name'] : '');
-                    }),
-                TextWithIcon(
-                    textStyle: normalStyle,
-                    iconData: Icons.schedule,
-                    text: lastUpdateTime),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+
+        return FutureBuilder(
+            future: docRef_request,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Error!');
+              }
+              if (!snapshot.hasData) {
+                return const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                  ],
+                );
+              }
+              final status = snapshot.data!.data()!.containsKey('status')
+                  ? snapshot.data!.data()!['status']
+                  : 'No timeOfLastChat';
+
+              return Card(
+                color: status == 'pending' ? Colors.grey : status == 'approve' ? Colors.green : Colors.red,
+                child: InkWell(
+                  onTap: () {
+                    appState.selectedRequestId = id;
+                    appState.screenId = 7;
+                  },
+                  child:
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder(
+                              future: getDepartmentsName(title),
+                              builder: (context, snapshot) {
+                                return TextWithIcon(
+                                  iconData: Icons.fact_check,
+                                  text: snapshot.hasData ? snapshot.data! : '',
+                                  textStyle: nameStyle,
+                                );
+                              },
+                            ),
+                            FutureBuilder(
+                              future: hospital,
+                              builder: (context, snapshot) {
+                                return TextWithIcon(
+                                  textStyle: normalStyle,
+                                  iconData: Icons.domain,
+                                  text: snapshot.hasData ? snapshot.data!['name'] : '',
+                                );
+                              },
+                            ),
+                            TextWithIcon(
+                              textStyle: normalStyle,
+                              iconData: Icons.schedule,
+                              text: lastUpdateTime,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ),
+              );
+            },
+        );
   }
 }
