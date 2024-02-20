@@ -8,14 +8,10 @@ import '../custom_widgets/text_with_icon.dart';
 class RequestDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
-    var docRef_hospital = FirebaseFirestore.instance
-        .collection('hospital')
-        .doc('4OWMRebFOJsbcNiDCn34') //要確認
-        .get();
 
     var docRef_request = FirebaseFirestore.instance
         .collection('request')
-        .doc('2IyLhxrvEssC9chPpWE6') //要確認
+        .doc(appState.selectedRequestId)
         .get();
 
 /*  テキストスタイル  */
@@ -43,7 +39,7 @@ class RequestDetail extends StatelessWidget {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        appState.screenId = 2;
+        appState.screenId = 6;
       },
       child: SingleChildScrollView(
         child: FutureBuilder(
@@ -76,6 +72,12 @@ class RequestDetail extends StatelessWidget {
                   snapshot.data!.data()!.containsKey('timeOfResponse')
                       ? snapshot.data!.data()!['timeOfResponse']
                       : 'No timeOfResponse';
+              final hospitalId = snapshot.data!.data()!['hospital'];
+
+              var docRef_hospital = FirebaseFirestore.instance
+                  .collection('hospital')
+                  .doc(hospitalId)
+                  .get();
 
               return Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
