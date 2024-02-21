@@ -4,5 +4,6 @@
         "geolocator",
         "geopoint",
         "requeststyle"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
