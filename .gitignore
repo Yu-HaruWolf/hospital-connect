@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/release
 
 .vscode/settings.json
+*.env
+android/secret.properties
+*env.g.dart

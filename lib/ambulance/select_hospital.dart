@@ -1,13 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import 'hospital.dart';
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../env/env.dart';
 
 class SelectHospital extends StatefulWidget {
   const SelectHospital({super.key});
@@ -103,7 +105,7 @@ class _SelectHospitalState extends State<SelectHospital> {
       }
     }
     List<Hospital> hospitalList = [];
-    String apiKey = 'AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA';
+    final String apiKey = Env.key;
     await Future.forEach(filteredHospitals, (value) async {
       //filterHospitalsは選択された診療科すべて満たす病院ドキュメントのリスト
       dynamic data = value.data();

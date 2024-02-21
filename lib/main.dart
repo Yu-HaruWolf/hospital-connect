@@ -14,7 +14,7 @@ import 'app_state.dart';
 import 'request_list_page.dart';
 import 'hospital/request_detail.dart';
 
-void main() {
+Future<void> main() async {
   runApp(ChangeNotifierProvider(
     create: (context) => ApplicationState(),
     builder: ((context, child) => const MyApp()),

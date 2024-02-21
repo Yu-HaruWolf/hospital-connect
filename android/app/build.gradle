@@ -4,9 +4,17 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def keystorePropertiesFile = rootProject.file("key.properties")
 def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+def secretProperties = new Properties()
+def secretPropertiesFile = rootProject.file("secret.properties")
+if (secretPropertiesFile.exists()) {
+    secretPropertiesFile.withReader('UTF-8') { reader ->
+        secretProperties.load(reader)
+    }
+}
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -45,14 +53,14 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.github.yu_haruwolf.fast_rescue"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        manifestPlaceholders += [
+            googleMapApiKey: secretProperties.getProperty('googleMap.apiKey')
+        ]
     }
 
     signingConfigs {
