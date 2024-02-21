@@ -9,5 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check-out repository
+        uses: actions/checkout@v2
+        
       - name: base64
-        run: echo -n ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > temp.txt
+        run: echo -n ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > android/release.jks
