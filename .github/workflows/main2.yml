@@ -1,0 +1,13 @@
+name: base64 test
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  base64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: base64
+        run: echo Zmpma2xkYW5sdgo= | base64 -d
