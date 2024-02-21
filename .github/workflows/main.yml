@@ -40,6 +40,9 @@ jobs:
 
       - name: Create env.g.dart
         run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Clean the project
+        run: flutter clean
       
       - name: Build a project
         run: flutter build apk --release
