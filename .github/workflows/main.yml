@@ -12,6 +12,15 @@ jobs:
       - name: Check-out repository
         uses: actions/checkout@v2
       
+      - name: Create release.jks
+        run: echo -n ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > android/release.jks
+
+      - name: Create key.properties
+        run: echo -n ${{ secrets.ANDROID_KEY_PROPERTIES }} | base64 -d > android/key.properties
+
+      - name: Create .env
+        run: echo -n ${{ secrets.ENV }} > .env
+      
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -28,15 +37,6 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-      
-      - name: Create release.jks
-        run: echo -n ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > android/release.jks
-
-      - name: Create key.properties
-        run: echo -n ${{ secrets.ANDROID_KEY_PROPERTIES }} | base64 -d > android/key.properties
-
-      - name: Create .env
-        run: echo -n ${{ secrets.ENV }} > .env
 
       - name: Create env.g.dart
         run: flutter pub run build_runner build --delete-conflicting-outputs
