@@ -14,3 +14,6 @@ jobs:
         
       - name: base64
         run: echo -n ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > android/release.jks
+
+      - name: Create key.properties
+        run: echo -n ${{ secrets.ANDROID_KEY_PROPERTIES }} | base64 -d > android/key.properties
