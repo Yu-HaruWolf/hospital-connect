@@ -10,4 +10,4 @@ jobs:
 
     steps:
       - name: base64
-        run: echo ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > temp.txt
+        run: echo ${{ secrets.ANDROID_RELEASE_KEY_JKS }} | base64 -d > android/release.jks
