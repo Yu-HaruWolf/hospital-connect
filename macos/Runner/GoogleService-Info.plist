@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBzjoWFxXijOlnwRXE1YGTLsOv__D5DBVQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>246901411650</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.github.yu_haruwolf.fast_rescue.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>tcu-rescue</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tcu-rescue.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:246901411650:ios:f071cb75f2b7257d8682db</string>
+</dict>
+</plist>

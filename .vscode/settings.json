@@ -1,0 +1,9 @@
+{
+    "cSpell.words": [
+        "firestore",
+        "geolocator",
+        "geopoint",
+        "requeststyle"
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

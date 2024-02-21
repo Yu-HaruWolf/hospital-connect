@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rescue</title>
+<style>
+  body{
+    text-align: center;
+  }
+</style>
+</head>
+
+<!--ボタン表示-->
+<body>
+  <div>
+    <button id="dep00">内科</button>
+    <button id="dep01">小児科</button>
+    <button id="dep02">皮膚科</button>
+    <button id="dep03">精神科</button>
+    <button id="dep04">外科</button>
+    <button id="dep05">産婦人科</button>
+    <button id="dep06">眼科</button><br>
+    <button id="dep07">耳鼻咽喉科</button>
+    <button id="dep08">泌尿器科</button>
+    <button id="dep09">脳神経外科</button>
+    <button id="dep10">形成外科</button>
+    <button id="dep11">整形外科</button><br><br>
+    <button id="searchAnd">AND検索</button><br><br>
+    <button id="searchOr">OR検索</button><br><br>
+    <button id="submit">登録</button>
+
+
+  </div>
+  <br>
+  <!--病院受け入れ人数更新-->
+  <div>
+    <textarea id="hospitalName" cols="30" rows="1" placeholder="病院名"></textarea>
+    <textarea id="numOfAcceptedID" cols="5" rows="1" placeholder="人数"></textarea>
+
+    <button id="update">更新</button>
+  </div>
+
+  <!-- JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- JQuery -->
+
+  <!--googlemapAPI-->
+  <script async src="http://maps.google.com/maps/api/js?key=AIzaSyABgyTTcc_NYhjY9yIbadCZYzcPkkDxCzA&language=ja"></script>
+  <!--googlemapAPI-->
+
+<!--** 以下Firebase **-->
+<script type="module" src="index.js"></script>
+</body>
+</html>
