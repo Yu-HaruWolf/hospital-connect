@@ -62,7 +62,7 @@ class ApplicationState extends ChangeNotifier {
           _departments = [];
           for (final document in snapshot.docs) {
             _departments
-                .add(Department(id: document.id, name: document.data()['ja']));
+                .add(Department(id: document.id, name: document.data()['en']));
           }
         });
       } else {

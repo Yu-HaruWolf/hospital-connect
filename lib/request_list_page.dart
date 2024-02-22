@@ -108,7 +108,7 @@ class RequestCard extends StatelessWidget {
     String result = "";
     for (DocumentReference<Map<String, dynamic>> doc in docs) {
       DocumentSnapshot<Map<String, dynamic>> snapshot = await doc.get();
-      String name = snapshot.data()!['ja'];
+      String name = snapshot.data()!['en'];
       if (result != "") {
         result += ",$name";
       } else {

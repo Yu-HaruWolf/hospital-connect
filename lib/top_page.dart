@@ -38,7 +38,7 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 1;
                         },
-                        child: const Text('病院を検索'))),
+                        child: const Text('Search the hospitals'))),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -49,7 +49,7 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 6;
                         },
-                        child: const Text('リクエスト一覧'))),
+                        child: const Text('Request list'))),
               ),
               signOutButton,
               Text('GPS: ${appState.isReadyGPS ? 'Ready.' : 'Not Ready.'}'),
@@ -67,7 +67,7 @@ class TopPage extends StatelessWidget {
                         onPressed: () {
                           appState.screenId = 6;
                         },
-                        child: const Text('リクエスト一覧'))),
+                        child: const Text('Request list'))),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -78,7 +78,8 @@ class TopPage extends StatelessWidget {
                     onPressed: () {
                       appState.screenId = 5;
                     },
-                    child: const Text('人数変更'),
+                    child: const Text(
+                        'Change the number of people who can be accepted'),
                   ),
                 ),
               ),

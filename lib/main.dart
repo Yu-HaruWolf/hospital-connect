@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
         insideWidget = RequestDetail();
         break;
       default:
-        insideWidget = const Text('正しいscreenIdを設定してください！');
+        insideWidget = const Text('Invalid Screen ID!');
     }
 
     return Scaffold(
@@ -157,13 +157,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ? BottomNavigationBar(
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.reply_outlined), label: '戻る'),
+                    icon: Icon(Icons.reply_outlined), label: 'Back'),
                 if (appState.screenId == 3)
                   BottomNavigationBarItem(
                       icon: Icon(Icons.send), label: 'Request'),
                 if (appState.screenId == 7)
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.chat), label: 'チャット'),
+                      icon: Icon(Icons.chat), label: 'Chat'),
               ],
               selectedItemColor: Colors.black,
               selectedFontSize: 20,

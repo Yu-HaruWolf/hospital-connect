@@ -122,7 +122,7 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                       });
                     },
                     icon: const Icon(Icons.close),
-                    label: const Text('クリア'),
+                    label: const Text('Clear'),
                     style: cancelButtonStyle,
                   ),
                 ),
@@ -138,8 +138,8 @@ class _SelectDepartmentState extends State<SelectDepartment> {
                     },
                     icon: const Icon(Icons.send),
                     label: selected.isNotEmpty
-                        ? Text('送信 ${selected.length}')
-                        : const Text('送信'),
+                        ? Text('Send ${selected.length}')
+                        : const Text('Send'),
                     style: sendButtonStyle,
                   ),
                 ),

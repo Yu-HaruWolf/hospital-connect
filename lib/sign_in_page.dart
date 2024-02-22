@@ -6,8 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 class SignInPage extends StatelessWidget {
-  SignInPage(this.signInMethod, {super.key});
-  String signInMethod;
+  const SignInPage(this.signInMethod, {super.key});
+  final String signInMethod;
 
   @override
   Widget build(BuildContext context) {

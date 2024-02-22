@@ -64,6 +64,7 @@ class _ChatRoomState extends State<ChatRoom> {
     return Scaffold(
       // Scaffold を返す
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Chat Room'),
       ),
       body: Chat(
