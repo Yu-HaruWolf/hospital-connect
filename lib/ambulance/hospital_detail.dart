@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../custom_widgets/text_with_icon.dart';
 import '../app_state.dart';
@@ -140,10 +141,27 @@ class _HospitalDetailsState extends State<HospitalDetails> {
                         iconData: Icons.domain,
                         text: address,
                       ),
-                      TextWithIcon(
-                        textStyle: normalStyle,
-                        iconData: Icons.call,
-                        text: number,
+                      InkWell(
+                        onTap: () async {
+                          final Uri callLaunchUri = Uri(
+                            scheme: 'tel',
+                            path: number,
+                          );
+                          if (await canLaunchUrl(callLaunchUri)) {
+                            await launchUrl(callLaunchUri);
+                          } else {
+                            final Error error = ArgumentError(
+                                'Could not launch $callLaunchUri');
+                            throw error;
+                          }
+                        },
+                        child: TextWithIcon(
+                          textStyle: TextStyle(
+                              fontSize: 20,
+                              decoration: TextDecoration.underline),
+                          iconData: Icons.call,
+                          text: number,
+                        ),
                       ),
                     ],
                   );

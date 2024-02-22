@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,12 +8,30 @@ import 'package:flutter/material.dart';
 import 'package:hospital_connect/request_settings.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 
-class RequestDetail extends StatelessWidget {
+class RequestDetail extends StatefulWidget {
   const RequestDetail({super.key});
+
+  @override
+  State<RequestDetail> createState() => _RequestDetailState();
+}
+
+class _RequestDetailState extends State<RequestDetail> {
+  DateTime nowTime = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        nowTime = DateTime.now();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +92,7 @@ class RequestDetail extends StatelessWidget {
               final status = snapshot.data!.data()!.containsKey('status')
                   ? snapshot.data!.data()!['status']
                   : 'No timeOfLastChat';
-              final timeOfLastChat =
+              final Timestamp timeOfLastChat =
                   snapshot.data!.data()!.containsKey('timeOfLastChat')
                       ? snapshot.data!.data()!['timeOfLastChat']
                       : 'No timeOfLastChat';
@@ -99,6 +118,15 @@ class RequestDetail extends StatelessWidget {
               return Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  if (DateTime.now().millisecondsSinceEpoch -
+                          timeOfLastChat.toDate().millisecondsSinceEpoch >=
+                      60000)
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Center(
+                          child: Text(
+                              'Please Response!${((nowTime.millisecondsSinceEpoch - timeOfLastChat.toDate().millisecondsSinceEpoch) / 1000).toInt()}s')),
+                    ),
                   FutureBuilder(
                       future: docRef_hospital,
                       builder: (context, snapshot) {
@@ -170,10 +198,27 @@ class RequestDetail extends StatelessWidget {
                               iconData: Icons.domain,
                               text: address,
                             ),
-                            TextWithIcon(
-                              textStyle: normalStyle,
-                              iconData: Icons.call,
-                              text: number,
+                            InkWell(
+                              onTap: () async {
+                                final Uri callLaunchUri = Uri(
+                                  scheme: 'tel',
+                                  path: number,
+                                );
+                                if (await canLaunchUrl(callLaunchUri)) {
+                                  await launchUrl(callLaunchUri);
+                                } else {
+                                  final Error error = ArgumentError(
+                                      'Could not launch $callLaunchUri');
+                                  throw error;
+                                }
+                              },
+                              child: TextWithIcon(
+                                textStyle: TextStyle(
+                                    fontSize: 20,
+                                    decoration: TextDecoration.underline),
+                                iconData: Icons.call,
+                                text: number,
+                              ),
                             ),
                           ],
                         );

@@ -134,13 +134,13 @@ class RequestCard extends StatelessWidget {
         cardColor = Theme.of(context).cardColor;
         break;
       case 'accepted':
-        cardColor = Colors.green;
+        cardColor = Theme.of(context).cardColor;
         break;
       case 'denied':
-        cardColor = Colors.red;
+        cardColor = Colors.grey;
         break;
       default:
-        cardColor = Colors.grey;
+        cardColor = Theme.of(context).cardColor;
         break;
     }
 
@@ -152,34 +152,40 @@ class RequestCard extends StatelessWidget {
           appState.selectedRequestId = id;
           appState.screenId = 7;
         },
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FutureBuilder(
-                    future: getDepartmentsName(title),
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          iconData: Icons.fact_check,
-                          text: snapshot.hasData ? snapshot.data! : '',
-                          textStyle: nameStyle);
-                    }),
-                FutureBuilder(
-                    future: hospital,
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          textStyle: normalStyle,
-                          iconData: Icons.domain,
-                          text: snapshot.hasData ? snapshot.data!['name'] : '');
-                    }),
-                TextWithIcon(
-                    textStyle: normalStyle,
-                    iconData: Icons.schedule,
-                    text: lastUpdateTime),
-              ],
+        child: Badge(
+          alignment: Alignment.topLeft,
+          label: Text('Pending'),
+          isLabelVisible: status == 'pending',
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder(
+                      future: getDepartmentsName(title),
+                      builder: (context, snapshot) {
+                        return TextWithIcon(
+                            iconData: Icons.fact_check,
+                            text: snapshot.hasData ? snapshot.data! : '',
+                            textStyle: nameStyle);
+                      }),
+                  FutureBuilder(
+                      future: hospital,
+                      builder: (context, snapshot) {
+                        return TextWithIcon(
+                            textStyle: normalStyle,
+                            iconData: Icons.domain,
+                            text:
+                                snapshot.hasData ? snapshot.data!['name'] : '');
+                      }),
+                  TextWithIcon(
+                      textStyle: normalStyle,
+                      iconData: Icons.schedule,
+                      text: lastUpdateTime),
+                ],
+              ),
             ),
           ),
         ),

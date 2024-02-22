@@ -139,8 +139,9 @@ class _SelectHospitalState extends State<SelectHospital> {
         final responseBody = response.body;
         // リンクから距離を取得してソートする
         Map<String, dynamic> responseData = json.decode(responseBody);
-        if (responseData['rows'][0]['elements'][0]['status'] ==
-            "ZERO_RESULTS") {
+        if (responseData['status'] != 'OK' ||
+            responseData['rows'][0]['elements'][0]['status'] ==
+                "ZERO_RESULTS") {
           distanceValue = 999999;
           hospitalList.add(Hospital(
               id: value.id,
