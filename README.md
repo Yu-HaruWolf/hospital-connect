@@ -8,7 +8,8 @@ This app is not contains actual data.
 
 # How to run this code
 This app required signing and Google Maps API Key. 
-So, we recommend to use APK file from release.
+So, we recommend to use the following APK file from [release page](https://github.com/Yu-HaruWolf/tcu-connect/releases).<br>
+(First two accounts are from hospital perspective, third accuount is ambulance perspective)
 
 # Accounts
 ## Hospital
