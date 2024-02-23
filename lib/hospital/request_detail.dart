@@ -33,6 +33,25 @@ class _RequestDetailState extends State<RequestDetail> {
     });
   }
 
+  Future<String> getDepartmentsName(List<String> docs) async {
+    String result = "";
+    for (String doc in docs) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('department')
+          .doc(doc)
+          .get();
+      String name = snapshot.data()!['en'];
+      if (result != "") {
+        result += ",$name";
+      } else {
+        result += name;
+      }
+    }
+    if (result == "") result = "No Department";
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<ApplicationState>();
@@ -201,6 +220,18 @@ class _RequestDetailState extends State<RequestDetail> {
                               iconData: Icons.domain,
                               text: address,
                             ),
+                            FutureBuilder(
+                              future: getDepartmentsName(requestedDepartments),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData)
+                                  return TextWithIcon(
+                                    iconData: Icons.domain,
+                                    text: snapshot.data!,
+                                    textStyle: normalStyle,
+                                  );
+                                return SizedBox();
+                              },
+                            ),
                             InkWell(
                               onTap: () async {
                                 final Uri callLaunchUri = Uri(
@@ -232,7 +263,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<リクエスト送信日時>',
+                          '<Request sent time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -249,7 +280,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終更新日時>',
+                          '<Last update time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -265,7 +296,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終チャット日時>',
+                          '<Last chat time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -280,7 +311,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'リクエスト状況:  ${status}',
+                          'Request status:  ${status}',
                           style: TextStyle(
                             fontSize: 25,
                             color:
