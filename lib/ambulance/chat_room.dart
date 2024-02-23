@@ -89,9 +89,16 @@ class _ChatRoomState extends State<ChatRoom> {
     Map<String, dynamic> data = {
       "authorId": message.author.id,
       "createdAt": message.createdAt,
-      "text": message.text
+      "text": message.text,
     };
-
+    FirebaseFirestore.instance
+        .collection('request')
+        .doc(context.read<ApplicationState>().selectedRequestId)
+        .update({
+      "lastActionBy": context.read<ApplicationState>().userType == 1
+          ? 'ambulance'
+          : 'hospital'
+    });
     chatCollection.add(data);
     updateLastChatTime();
     setState(() {

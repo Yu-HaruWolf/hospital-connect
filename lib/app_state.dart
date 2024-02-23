@@ -26,6 +26,8 @@ class ApplicationState extends ChangeNotifier {
 
   // Firebase Firestore関係
   StreamSubscription<QuerySnapshot>? _departmentSubscription;
+  StreamSubscription<QuerySnapshot>? _requestSubscription;
+  int pendingRequest = 0;
   List<Department> _departments = [];
   List<Department> get departments => _departments;
   int userType = -1; // -1:未認証/未登録 1:救急隊 2:病院
@@ -54,6 +56,15 @@ class ApplicationState extends ChangeNotifier {
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
           loggedInHospital = doc.data()!['hospital'].id;
+          _requestSubscription = FirebaseFirestore.instance
+              .collection('request')
+              .where('hospital', isEqualTo: loggedInHospital)
+              .where('status', isEqualTo: 'pending')
+              .snapshots()
+              .listen((snapshot) {
+            pendingRequest = snapshot.docs.length;
+            notifyListeners();
+          });
         }
         _departmentSubscription = FirebaseFirestore.instance
             .collection('department')
