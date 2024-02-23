@@ -193,7 +193,7 @@ class _RequestDetailState extends State<RequestDetail> {
                         }
                         return Column(
                           children: [
-                            if (geopoint != null)
+                            if (appState.userType == 1 && geopoint != null)
                               SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.4,
@@ -211,15 +211,17 @@ class _RequestDetailState extends State<RequestDetail> {
                                   },
                                 ),
                               ),
-                            Text(
-                              name,
-                              style: nameStyle,
-                            ),
-                            TextWithIcon(
-                              textStyle: normalStyle,
-                              iconData: Icons.domain,
-                              text: address,
-                            ),
+                            if (appState.userType == 1)
+                              Text(
+                                name,
+                                style: nameStyle,
+                              ),
+                            if (appState.userType == 1)
+                              TextWithIcon(
+                                textStyle: normalStyle,
+                                iconData: Icons.domain,
+                                text: address,
+                              ),
                             FutureBuilder(
                               future: getDepartmentsName(requestedDepartments),
                               builder: (context, snapshot) {
@@ -232,28 +234,29 @@ class _RequestDetailState extends State<RequestDetail> {
                                 return SizedBox();
                               },
                             ),
-                            InkWell(
-                              onTap: () async {
-                                final Uri callLaunchUri = Uri(
-                                  scheme: 'tel',
-                                  path: number,
-                                );
-                                if (await canLaunchUrl(callLaunchUri)) {
-                                  await launchUrl(callLaunchUri);
-                                } else {
-                                  final Error error = ArgumentError(
-                                      'Could not launch $callLaunchUri');
-                                  throw error;
-                                }
-                              },
-                              child: TextWithIcon(
-                                textStyle: TextStyle(
-                                    fontSize: 20,
-                                    decoration: TextDecoration.underline),
-                                iconData: Icons.call,
-                                text: number,
+                            if (appState.userType == 1)
+                              InkWell(
+                                onTap: () async {
+                                  final Uri callLaunchUri = Uri(
+                                    scheme: 'tel',
+                                    path: number,
+                                  );
+                                  if (await canLaunchUrl(callLaunchUri)) {
+                                    await launchUrl(callLaunchUri);
+                                  } else {
+                                    final Error error = ArgumentError(
+                                        'Could not launch $callLaunchUri');
+                                    throw error;
+                                  }
+                                },
+                                child: TextWithIcon(
+                                  textStyle: TextStyle(
+                                      fontSize: 20,
+                                      decoration: TextDecoration.underline),
+                                  iconData: Icons.call,
+                                  text: number,
+                                ),
                               ),
-                            ),
                           ],
                         );
                       }),
