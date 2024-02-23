@@ -101,6 +101,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       ? snapshot.data!.data()!['timeOfResponse']
                       : 'No timeOfResponse';
               final hospitalId = snapshot.data!.data()!['hospital'];
+              final lastActionBy = snapshot.data!.data()!['lastActionBy'];
               List<String> requestedDepartments = [];
               final departments = snapshot.data!.data()!.containsKey('patient')
                   ? snapshot.data!.data()!['patient']
@@ -118,14 +119,16 @@ class _RequestDetailState extends State<RequestDetail> {
               return Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (DateTime.now().millisecondsSinceEpoch -
-                          timeOfLastChat.toDate().millisecondsSinceEpoch >=
-                      60000)
+                  if (status == 'pending' &&
+                      (appState.userType == 2 && lastActionBy == 'ambulance') &&
+                      DateTime.now().millisecondsSinceEpoch -
+                              timeOfLastChat.toDate().millisecondsSinceEpoch >=
+                          30000)
                     SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Text(
-                              'Please Response!${((nowTime.millisecondsSinceEpoch - timeOfLastChat.toDate().millisecondsSinceEpoch) / 1000).toInt()}s')),
+                              'Please Action! ${((nowTime.millisecondsSinceEpoch - timeOfLastChat.toDate().millisecondsSinceEpoch) / 1000).toInt()}s')),
                     ),
                   FutureBuilder(
                       future: docRef_hospital,
@@ -341,7 +344,16 @@ void updateRequestStatus(String requestId, String status) {
   var now = FieldValue.serverTimestamp();
   DocumentReference requestRef =
       FirebaseFirestore.instance.collection('request').doc(requestId);
-  requestRef.update({'status': status, "timeOfResponse": now});
+  requestRef.update({
+    'status': status,
+    "timeOfResponse": now,
+    "lastActionBy": 'ambulance',
+  });
+  requestRef.collection('chat').add({
+    "authorId": '0',
+    "createdAt": DateTime.now().millisecondsSinceEpoch,
+    "text": 'Status changed: $status'
+  });
 }
 
 void updateLastChatTime(String requestId) {

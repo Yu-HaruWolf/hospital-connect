@@ -87,8 +87,8 @@ class _TopPageState extends State<TopPage> {
                 padding: const EdgeInsets.all(10.0),
                 child: Badge(
                   alignment: Alignment.topLeft,
-                  label: Text('Pending'),
-                  isLabelVisible: true,
+                  label: Text(appState.pendingRequest.toString()),
+                  isLabelVisible: appState.pendingRequest > 0,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: 80,
