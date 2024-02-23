@@ -115,6 +115,7 @@ class _TopPageState extends State<TopPage> {
                 ),
               ),
               signOutButton,
+              Text('Hospital: ${appState.userName}'),
             ],
           );
       }

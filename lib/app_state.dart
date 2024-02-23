@@ -35,6 +35,9 @@ class ApplicationState extends ChangeNotifier {
   // 病院用関連付け
   String loggedInHospital = "";
 
+  String _userName = "";
+  String get userName => _userName;
+
   Future<void> firebaseInit() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
@@ -52,10 +55,22 @@ class ApplicationState extends ChangeNotifier {
           userType = -1;
         } else if (doc.data()!['type'] == 'ambulance') {
           userType = 1;
+          if (FirebaseAuth.instance.currentUser!.displayName == null ||
+              FirebaseAuth.instance.currentUser!.displayName == "") {
+            _userName =
+                FirebaseAuth.instance.currentUser!.email!.split(('@'))[0];
+          } else {
+            _userName = FirebaseAuth.instance.currentUser!.displayName!;
+          }
           gpsInit();
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
           loggedInHospital = doc.data()!['hospital'].id;
+          var hospitalDoc = await FirebaseFirestore.instance
+              .collection('hospital')
+              .doc(loggedInHospital)
+              .get();
+          _userName = hospitalDoc.data()!['name'];
           _requestSubscription = FirebaseFirestore.instance
               .collection('request')
               .where('hospital', isEqualTo: loggedInHospital)
@@ -81,6 +96,7 @@ class ApplicationState extends ChangeNotifier {
         _departmentSubscription?.cancel();
         userType = -1;
         loggedInHospital = "";
+        _userName = "";
       }
       notifyListeners();
     });

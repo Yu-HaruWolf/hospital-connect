@@ -179,6 +179,10 @@ class _RequestDetailState extends State<RequestDetail> {
                             snapshot.data!.data()!.containsKey('place')
                                 ? snapshot.data!.data()!['place']
                                 : null;
+                        final ambulanceName =
+                            snapshot.data!.data()!.containsKey('ambulanceName')
+                                ? snapshot.data!.data()!['ambulanceName']
+                                : null;
                         late Marker marker;
                         late LatLng latLng;
                         Set<Marker> markers = {};
@@ -257,6 +261,7 @@ class _RequestDetailState extends State<RequestDetail> {
                                   text: number,
                                 ),
                               ),
+                            Text('aa', style: nameStyle),
                           ],
                         );
                       }),

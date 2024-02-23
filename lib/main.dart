@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hospital_connect/custom_widgets/text_with_icon.dart';
+import 'package:hospital_connect/profile_page.dart';
 import 'package:provider/provider.dart';
 
 import 'ambulance/hospital_detail.dart';
@@ -159,6 +160,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 appState.screenId = 6;
               },
             ),
+          if (appState.userType != -1)
+            ListTile(
+              title:
+                  const TextWithIcon(iconData: Icons.person, text: 'Profile'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ProfilePage())),
+            ),
         ]),
       ),
       bottomNavigationBar: appState.screenId == 3 || appState.screenId == 7
@@ -209,6 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> createRequest(
       String hospitalId, List<String> patientsName) async {
     var now = FieldValue.serverTimestamp();
+    String userName = context.read<ApplicationState>().userName;
     final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
         [];
     for (var value in patientsName) {
@@ -217,6 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     final doc = await FirebaseFirestore.instance.collection('request').add({
       "ambulance": FirebaseAuth.instance.currentUser!.uid,
+      "ambulanceName": userName,
       "hospital": hospitalId,
       "status": 'pending',
       "patient": patientDocumentRefs,

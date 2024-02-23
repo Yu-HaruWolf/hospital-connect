@@ -7,6 +7,7 @@ class Request {
     required this.hospital,
     required this.ambulance,
     required this.patient,
+    required this.ambulanceName,
     required this.createTime,
     required this.lastChatTime,
     required this.responseTime,
@@ -17,6 +18,7 @@ class Request {
   final String hospital;
   final String ambulance;
   final List<dynamic> patient;
+  final String ambulanceName;
   final Timestamp createTime;
   final Timestamp lastChatTime;
   final Timestamp responseTime;

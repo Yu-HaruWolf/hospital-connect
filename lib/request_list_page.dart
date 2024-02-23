@@ -47,6 +47,7 @@ class _RequestListPageState extends State<RequestListPage> {
                   title: request.patient,
                   department: request.hospital,
                   lastUpdateTime: request.lastChatTime.toDate().toString(),
+                  ambulanceName: request.ambulanceName,
                   status: request.status,
                   id: request.id),
           ],
@@ -78,6 +79,7 @@ class _RequestListPageState extends State<RequestListPage> {
               hospital: doc.data()['hospital'],
               ambulance: doc.data()['ambulance'],
               patient: doc.data()['patient'],
+              ambulanceName: doc.data()['ambulanceName'],
               createTime: doc.data()['timeOfCreatingRequest'],
               lastChatTime: doc.data()['timeOfLastChat'],
               responseTime: doc.data()['timeOfResponse']));
@@ -94,12 +96,14 @@ class RequestCard extends StatelessWidget {
     required this.title,
     required this.department,
     required this.lastUpdateTime,
+    required this.ambulanceName,
     required this.status,
     required this.id,
   });
 
   final List<dynamic> title;
   final String department;
+  final String ambulanceName;
   final String lastUpdateTime;
   final String status;
   final String id;
@@ -171,15 +175,19 @@ class RequestCard extends StatelessWidget {
                             text: snapshot.hasData ? snapshot.data! : '',
                             textStyle: nameStyle);
                       }),
-                  FutureBuilder(
-                      future: hospital,
-                      builder: (context, snapshot) {
-                        return TextWithIcon(
-                            textStyle: normalStyle,
-                            iconData: Icons.domain,
-                            text:
-                                snapshot.hasData ? snapshot.data!['name'] : '');
-                      }),
+                  if (appState.userType == 1)
+                    FutureBuilder(
+                        future: hospital,
+                        builder: (context, snapshot) {
+                          return TextWithIcon(
+                              textStyle: normalStyle,
+                              iconData: Icons.domain,
+                              text: snapshot.hasData
+                                  ? snapshot.data!['name']
+                                  : '');
+                        }),
+                  if (appState.userType == 2)
+                    TextWithIcon(iconData: Icons.person, text: ambulanceName),
                   TextWithIcon(
                       textStyle: normalStyle,
                       iconData: Icons.schedule,

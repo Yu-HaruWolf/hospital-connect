@@ -26,11 +26,14 @@ class _ChatRoomState extends State<ChatRoom> {
   late CollectionReference<Map<String, dynamic>> chatCollection;
   late StreamSubscription<QuerySnapshot> _chatMessageSubscription;
   List<types.TextMessage> _messages = [];
-  final _user = types.User(id: FirebaseAuth.instance.currentUser!.uid);
+  late final _user;
 
   @override
   initState() {
     super.initState();
+    _user = types.User(
+        id: FirebaseAuth.instance.currentUser!.uid,
+        firstName: context.read<ApplicationState>().userName);
     chatCollection = FirebaseFirestore.instance
         .collection('request')
         .doc(context.read<ApplicationState>().selectedRequestId)
@@ -43,7 +46,9 @@ class _ChatRoomState extends State<ChatRoom> {
         _messages = [];
         for (final document in snapshot.docs) {
           _messages.add(types.TextMessage(
-            author: types.User(id: document.data()['authorId']),
+            author: types.User(
+                id: document.data()['authorId'],
+                firstName: document.data()['name']),
             id: document.id,
             createdAt: document.data()['createdAt'],
             text: document.data()['text'],
@@ -87,6 +92,7 @@ class _ChatRoomState extends State<ChatRoom> {
 
   void _addMessage(types.TextMessage message) {
     Map<String, dynamic> data = {
+      "name": _user.firstName,
       "authorId": message.author.id,
       "createdAt": message.createdAt,
       "text": message.text,
