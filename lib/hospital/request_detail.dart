@@ -121,6 +121,7 @@ class _RequestDetailState extends State<RequestDetail> {
                       : 'No timeOfResponse';
               final hospitalId = snapshot.data!.data()!['hospital'];
               final lastActionBy = snapshot.data!.data()!['lastActionBy'];
+              final ambulanceName = snapshot.data!.data()!['ambulanceName'];
               List<String> requestedDepartments = [];
               final departments = snapshot.data!.data()!.containsKey('patient')
                   ? snapshot.data!.data()!['patient']
@@ -178,10 +179,6 @@ class _RequestDetailState extends State<RequestDetail> {
                         final GeoPoint? geopoint =
                             snapshot.data!.data()!.containsKey('place')
                                 ? snapshot.data!.data()!['place']
-                                : null;
-                        final ambulanceName =
-                            snapshot.data!.data()!.containsKey('ambulanceName')
-                                ? snapshot.data!.data()!['ambulanceName']
                                 : null;
                         late Marker marker;
                         late LatLng latLng;
@@ -261,10 +258,14 @@ class _RequestDetailState extends State<RequestDetail> {
                                   text: number,
                                 ),
                               ),
-                            Text('aa', style: nameStyle),
                           ],
                         );
                       }),
+                  TextWithIcon(
+                    iconData: Icons.person,
+                    text: ambulanceName,
+                    textStyle: normalStyle,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(5),
                     child: Column(
