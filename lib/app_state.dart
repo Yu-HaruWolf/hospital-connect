@@ -26,12 +26,17 @@ class ApplicationState extends ChangeNotifier {
 
   // Firebase Firestore関係
   StreamSubscription<QuerySnapshot>? _departmentSubscription;
+  StreamSubscription<QuerySnapshot>? _requestSubscription;
+  int pendingRequest = 0;
   List<Department> _departments = [];
   List<Department> get departments => _departments;
   int userType = -1; // -1:未認証/未登録 1:救急隊 2:病院
 
   // 病院用関連付け
   String loggedInHospital = "";
+
+  String _userName = "";
+  String get userName => _userName;
 
   Future<void> firebaseInit() async {
     await Firebase.initializeApp(
@@ -50,10 +55,31 @@ class ApplicationState extends ChangeNotifier {
           userType = -1;
         } else if (doc.data()!['type'] == 'ambulance') {
           userType = 1;
+          if (FirebaseAuth.instance.currentUser!.displayName == null ||
+              FirebaseAuth.instance.currentUser!.displayName == "") {
+            _userName =
+                FirebaseAuth.instance.currentUser!.email!.split(('@'))[0];
+          } else {
+            _userName = FirebaseAuth.instance.currentUser!.displayName!;
+          }
           gpsInit();
         } else if (doc.data()!['type'] == 'hospital') {
           userType = 2;
           loggedInHospital = doc.data()!['hospital'].id;
+          var hospitalDoc = await FirebaseFirestore.instance
+              .collection('hospital')
+              .doc(loggedInHospital)
+              .get();
+          _userName = hospitalDoc.data()!['name'];
+          _requestSubscription = FirebaseFirestore.instance
+              .collection('request')
+              .where('hospital', isEqualTo: loggedInHospital)
+              .where('status', isEqualTo: 'pending')
+              .snapshots()
+              .listen((snapshot) {
+            pendingRequest = snapshot.docs.length;
+            notifyListeners();
+          });
         }
         _departmentSubscription = FirebaseFirestore.instance
             .collection('department')
@@ -62,7 +88,7 @@ class ApplicationState extends ChangeNotifier {
           _departments = [];
           for (final document in snapshot.docs) {
             _departments
-                .add(Department(id: document.id, name: document.data()['ja']));
+                .add(Department(id: document.id, name: document.data()['en']));
           }
         });
       } else {
@@ -70,6 +96,7 @@ class ApplicationState extends ChangeNotifier {
         _departmentSubscription?.cancel();
         userType = -1;
         loggedInHospital = "";
+        _userName = "";
       }
       notifyListeners();
     });

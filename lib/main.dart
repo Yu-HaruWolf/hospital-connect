@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hospital_connect/custom_widgets/text_with_icon.dart';
+import 'package:hospital_connect/profile_page.dart';
 import 'package:provider/provider.dart';
 
 import 'ambulance/hospital_detail.dart';
@@ -27,23 +28,21 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<ApplicationState>();
-    //print(appState.selectedHospitalId);
     return MaterialApp(
       title: 'Hospital Connect',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Hospital Connect'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({
+    super.key,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -52,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    String title;
     var appState = context.watch<ApplicationState>();
     String? userName;
     if (appState.loggedIn) {
@@ -66,36 +66,45 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (appState.screenId) {
       case 0:
         insideWidget = const TopPage();
+        title = "Hospital Connect";
         break;
       case 1: /*  診療科選択  */
         insideWidget = const SelectDepartment();
+        title = "Select Departments";
         break;
       case 2: /*  搬送先一覧  */
         insideWidget = const SelectHospital();
+        title = "Select Hospital";
         break;
       case 3: /*  病院の詳細画面  */
         insideWidget = HospitalDetails();
+        title = "Hospital Detail";
         break;
       case 4: /*  チャット  */
         insideWidget = const ChatRoom();
+        title = "Chat Room";
         break;
       case 5: /*  診療科ごとの人数変更  */
         insideWidget = const SettingPage();
+        title = "Setting";
         break;
       case 6: /*  リクエスト一覧  */
         insideWidget = const RequestListPage();
+        title = "Request List";
         break;
       case 7: /*  リクエスト詳細画面  */
         insideWidget = RequestDetail();
+        title = "Request Detail";
         break;
       default:
-        insideWidget = const Text('正しいscreenIdを設定してください！');
+        insideWidget = const Text('Invalid Screen ID!');
+        title = "Hospital Connect";
     }
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
         child: insideWidget,
@@ -151,19 +160,26 @@ class _MyHomePageState extends State<MyHomePage> {
                 appState.screenId = 6;
               },
             ),
+          if (appState.userType != -1)
+            ListTile(
+              title:
+                  const TextWithIcon(iconData: Icons.person, text: 'Profile'),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ProfilePage())),
+            ),
         ]),
       ),
       bottomNavigationBar: appState.screenId == 3 || appState.screenId == 7
           ? BottomNavigationBar(
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.reply_outlined), label: '戻る'),
+                    icon: Icon(Icons.reply_outlined), label: 'Back'),
                 if (appState.screenId == 3)
                   BottomNavigationBarItem(
                       icon: Icon(Icons.send), label: 'Request'),
                 if (appState.screenId == 7)
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.chat), label: 'チャット'),
+                      icon: Icon(Icons.chat), label: 'Chat'),
               ],
               selectedItemColor: Colors.black,
               selectedFontSize: 20,
@@ -201,6 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> createRequest(
       String hospitalId, List<String> patientsName) async {
     var now = FieldValue.serverTimestamp();
+    String userName = context.read<ApplicationState>().userName;
     final List<DocumentReference<Map<String, dynamic>>> patientDocumentRefs =
         [];
     for (var value in patientsName) {
@@ -209,9 +226,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     final doc = await FirebaseFirestore.instance.collection('request').add({
       "ambulance": FirebaseAuth.instance.currentUser!.uid,
+      "ambulanceName": userName,
       "hospital": hospitalId,
       "status": 'pending',
       "patient": patientDocumentRefs,
+      "lastActionBy": 'ambulance',
       "timeOfCreatingRequest": now,
       "timeOfLastChat": now,
       "timeOfResponse": now,

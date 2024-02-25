@@ -28,7 +28,7 @@ class _RequestSettingPageState extends State<RequestSettingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Select Departments'),
+        title: const Text('Select Departments'),
       ),
       body: Center(
         child: Column(
@@ -63,7 +63,7 @@ class _RequestSettingPageState extends State<RequestSettingPage> {
                       .doc(appState.loggedInHospital);
                   for (String departmentId in selectedDepartments) {
                     await hospitalDoc.update({
-                      "department.${departmentId}.numOfAccepted":
+                      "department.$departmentId.numOfAccepted":
                           FieldValue.increment(-1)
                     });
                   }

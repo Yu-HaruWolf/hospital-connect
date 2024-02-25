@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,12 +8,49 @@ import 'package:flutter/material.dart';
 import 'package:hospital_connect/request_settings.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
 import '../custom_widgets/text_with_icon.dart';
 
-class RequestDetail extends StatelessWidget {
+class RequestDetail extends StatefulWidget {
   const RequestDetail({super.key});
+
+  @override
+  State<RequestDetail> createState() => _RequestDetailState();
+}
+
+class _RequestDetailState extends State<RequestDetail> {
+  DateTime nowTime = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        nowTime = DateTime.now();
+      });
+    });
+  }
+
+  Future<String> getDepartmentsName(List<String> docs) async {
+    String result = "";
+    for (String doc in docs) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('department')
+          .doc(doc)
+          .get();
+      String name = snapshot.data()!['en'];
+      if (result != "") {
+        result += ",$name";
+      } else {
+        result += name;
+      }
+    }
+    if (result == "") result = "No Department";
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +111,7 @@ class RequestDetail extends StatelessWidget {
               final status = snapshot.data!.data()!.containsKey('status')
                   ? snapshot.data!.data()!['status']
                   : 'No timeOfLastChat';
-              final timeOfLastChat =
+              final Timestamp timeOfLastChat =
                   snapshot.data!.data()!.containsKey('timeOfLastChat')
                       ? snapshot.data!.data()!['timeOfLastChat']
                       : 'No timeOfLastChat';
@@ -82,6 +120,8 @@ class RequestDetail extends StatelessWidget {
                       ? snapshot.data!.data()!['timeOfResponse']
                       : 'No timeOfResponse';
               final hospitalId = snapshot.data!.data()!['hospital'];
+              final lastActionBy = snapshot.data!.data()!['lastActionBy'];
+              final ambulanceName = snapshot.data!.data()!['ambulanceName'];
               List<String> requestedDepartments = [];
               final departments = snapshot.data!.data()!.containsKey('patient')
                   ? snapshot.data!.data()!['patient']
@@ -99,6 +139,17 @@ class RequestDetail extends StatelessWidget {
               return Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  if (status == 'pending' &&
+                      (appState.userType == 2 && lastActionBy == 'ambulance') &&
+                      DateTime.now().millisecondsSinceEpoch -
+                              timeOfLastChat.toDate().millisecondsSinceEpoch >=
+                          30000)
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Center(
+                          child: Text(
+                              'Please Action! ${((nowTime.millisecondsSinceEpoch - timeOfLastChat.toDate().millisecondsSinceEpoch) / 1000).toInt()}s')),
+                    ),
                   FutureBuilder(
                       future: docRef_hospital,
                       builder: (context, snapshot) {
@@ -143,7 +194,7 @@ class RequestDetail extends StatelessWidget {
                         }
                         return Column(
                           children: [
-                            if (geopoint != null)
+                            if (appState.userType == 1 && geopoint != null)
                               SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.4,
@@ -161,30 +212,67 @@ class RequestDetail extends StatelessWidget {
                                   },
                                 ),
                               ),
-                            Text(
-                              name,
-                              style: nameStyle,
+                            if (appState.userType == 1)
+                              Text(
+                                name,
+                                style: nameStyle,
+                              ),
+                            if (appState.userType == 1)
+                              TextWithIcon(
+                                textStyle: normalStyle,
+                                iconData: Icons.domain,
+                                text: address,
+                              ),
+                            FutureBuilder(
+                              future: getDepartmentsName(requestedDepartments),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData)
+                                  return TextWithIcon(
+                                    iconData: Icons.domain,
+                                    text: snapshot.data!,
+                                    textStyle: normalStyle,
+                                  );
+                                return SizedBox();
+                              },
                             ),
-                            TextWithIcon(
-                              textStyle: normalStyle,
-                              iconData: Icons.domain,
-                              text: address,
-                            ),
-                            TextWithIcon(
-                              textStyle: normalStyle,
-                              iconData: Icons.call,
-                              text: number,
-                            ),
+                            if (appState.userType == 1)
+                              InkWell(
+                                onTap: () async {
+                                  final Uri callLaunchUri = Uri(
+                                    scheme: 'tel',
+                                    path: number,
+                                  );
+                                  if (await canLaunchUrl(callLaunchUri)) {
+                                    await launchUrl(callLaunchUri);
+                                  } else {
+                                    final Error error = ArgumentError(
+                                        'Could not launch $callLaunchUri');
+                                    throw error;
+                                  }
+                                },
+                                child: TextWithIcon(
+                                  textStyle: TextStyle(
+                                      fontSize: 20,
+                                      decoration: TextDecoration.underline),
+                                  iconData: Icons.call,
+                                  text: number,
+                                ),
+                              ),
                           ],
                         );
                       }),
+                  TextWithIcon(
+                    iconData: Icons.person,
+                    text: ambulanceName,
+                    textStyle: normalStyle,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(5),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<リクエスト送信日時>',
+                          '<Request sent time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -201,7 +289,7 @@ class RequestDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終更新日時>',
+                          '<Last update time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -217,7 +305,7 @@ class RequestDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '<最終チャット日時>',
+                          '<Last chat time>',
                           style: titleStyle,
                         ),
                         TextWithIcon(
@@ -232,7 +320,7 @@ class RequestDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'リクエスト状況:  ${status}',
+                          'Request status:  ${status}',
                           style: TextStyle(
                             fontSize: 25,
                             color:
@@ -296,7 +384,16 @@ void updateRequestStatus(String requestId, String status) {
   var now = FieldValue.serverTimestamp();
   DocumentReference requestRef =
       FirebaseFirestore.instance.collection('request').doc(requestId);
-  requestRef.update({'status': status, "timeOfResponse": now});
+  requestRef.update({
+    'status': status,
+    "timeOfResponse": now,
+    "lastActionBy": 'ambulance',
+  });
+  requestRef.collection('chat').add({
+    "authorId": '0',
+    "createdAt": DateTime.now().millisecondsSinceEpoch,
+    "text": 'Status changed: $status'
+  });
 }
 
 void updateLastChatTime(String requestId) {

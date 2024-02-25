@@ -47,6 +47,7 @@ class _RequestListPageState extends State<RequestListPage> {
                   title: request.patient,
                   department: request.hospital,
                   lastUpdateTime: request.lastChatTime.toDate().toString(),
+                  ambulanceName: request.ambulanceName,
                   status: request.status,
                   id: request.id),
           ],
@@ -78,6 +79,7 @@ class _RequestListPageState extends State<RequestListPage> {
               hospital: doc.data()['hospital'],
               ambulance: doc.data()['ambulance'],
               patient: doc.data()['patient'],
+              ambulanceName: doc.data()['ambulanceName'],
               createTime: doc.data()['timeOfCreatingRequest'],
               lastChatTime: doc.data()['timeOfLastChat'],
               responseTime: doc.data()['timeOfResponse']));
@@ -94,12 +96,14 @@ class RequestCard extends StatelessWidget {
     required this.title,
     required this.department,
     required this.lastUpdateTime,
+    required this.ambulanceName,
     required this.status,
     required this.id,
   });
 
   final List<dynamic> title;
   final String department;
+  final String ambulanceName;
   final String lastUpdateTime;
   final String status;
   final String id;
@@ -108,7 +112,7 @@ class RequestCard extends StatelessWidget {
     String result = "";
     for (DocumentReference<Map<String, dynamic>> doc in docs) {
       DocumentSnapshot<Map<String, dynamic>> snapshot = await doc.get();
-      String name = snapshot.data()!['ja'];
+      String name = snapshot.data()!['en'];
       if (result != "") {
         result += ",$name";
       } else {
@@ -134,13 +138,13 @@ class RequestCard extends StatelessWidget {
         cardColor = Theme.of(context).cardColor;
         break;
       case 'accepted':
-        cardColor = Colors.green;
+        cardColor = Theme.of(context).cardColor;
         break;
       case 'denied':
-        cardColor = Colors.red;
+        cardColor = Colors.grey;
         break;
       default:
-        cardColor = Colors.grey;
+        cardColor = Theme.of(context).cardColor;
         break;
     }
 
@@ -152,34 +156,44 @@ class RequestCard extends StatelessWidget {
           appState.selectedRequestId = id;
           appState.screenId = 7;
         },
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FutureBuilder(
-                    future: getDepartmentsName(title),
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          iconData: Icons.fact_check,
-                          text: snapshot.hasData ? snapshot.data! : '',
-                          textStyle: nameStyle);
-                    }),
-                FutureBuilder(
-                    future: hospital,
-                    builder: (context, snapshot) {
-                      return TextWithIcon(
-                          textStyle: normalStyle,
-                          iconData: Icons.domain,
-                          text: snapshot.hasData ? snapshot.data!['name'] : '');
-                    }),
-                TextWithIcon(
-                    textStyle: normalStyle,
-                    iconData: Icons.schedule,
-                    text: lastUpdateTime),
-              ],
+        child: Badge(
+          alignment: Alignment.topLeft,
+          label: Text('Pending'),
+          isLabelVisible: status == 'pending',
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder(
+                      future: getDepartmentsName(title),
+                      builder: (context, snapshot) {
+                        return TextWithIcon(
+                            iconData: Icons.fact_check,
+                            text: snapshot.hasData ? snapshot.data! : '',
+                            textStyle: nameStyle);
+                      }),
+                  if (appState.userType == 1)
+                    FutureBuilder(
+                        future: hospital,
+                        builder: (context, snapshot) {
+                          return TextWithIcon(
+                              textStyle: normalStyle,
+                              iconData: Icons.domain,
+                              text: snapshot.hasData
+                                  ? snapshot.data!['name']
+                                  : '');
+                        }),
+                  if (appState.userType == 2)
+                    TextWithIcon(iconData: Icons.person, text: ambulanceName),
+                  TextWithIcon(
+                      textStyle: normalStyle,
+                      iconData: Icons.schedule,
+                      text: lastUpdateTime),
+                ],
+              ),
             ),
           ),
         ),
