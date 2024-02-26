@@ -9,7 +9,7 @@ This app is not contains actual data.
 # How to run this code
 This app required signing and Google Maps API Key. 
 So, we recommend to use the following APK file from [release page](https://github.com/Yu-HaruWolf/hospital-connect/releases).<br>
-All registered hospitals are located in Japan. We recommend that you set your location to Japan.
+All registered hospitals are located in Japan. We recommend that you set your location to Japan.<br>
 (First three accounts are from hospital perspective, last two accuount is ambulance perspective)
 
 # Accounts
